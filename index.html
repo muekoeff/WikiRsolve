@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta content="nw520" name="author" />
+<meta content="width=device-width,initial-scale=1,shrink-to-fit=no" name="viewport" />
+<title>WikiRsolve &laquo; Wikidata Tools</title>
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css" integrity="sha384-9gVQ4dYFwwWSjIDZnLEWnxCjeSWFphJiwGPXr1jddIhOegiu1FwO5qRGvFXOdJZ4" crossorigin="anonymous" />
+<link rel="stylesheet" href="data/css/style.css" />
+<link rel="stylesheet" href="data/components/tooltipster/4.0/css/tooltipster.bundle.min.css" />
+<link rel="stylesheet" href="data/components/tooltipster/4.0/css/plugins/tooltipster/sideTip/themes/tooltipster-sideTip-light.min.css" />
+</head>
+
+<body>
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+	<a class="navbar-brand" href="#">WikiRsolve</a>
+	<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggler" aria-controls="navbarToggler" aria-expanded="false" aria-label="Toggle navigation">
+		<span class="navbar-toggler-icon"></span>
+	</button>
+	<div class="collapse navbar-collapse" id="navbarToggler">
+		<ul class="nav navbar-nav">
+			<li class="nav-item">
+				<a class="nav-link" href="#" data-toggle="modal" data-target="#modal-settings">Settings</a>
+			</li>
+			<li class="nav-item">
+				<a class="nav-link" href="#" target="_blank">Git</a>
+			</li>
+			<li class="nav-item">
+				<a class="nav-link" href="#" data-toggle="modal" data-target="#modal-help">Help</a>
+			</li>
+		</ul>
+	</div>
+</nav>
+<div class="container" style="padding:1em 0">
+	<div id="rowTable">
+		<div class="row">
+			<textarea id="commands" class="form-control" rows="10"></textarea>
+		</div>
+		<br />
+		<div class="row">
+			<button id="button-parse" class="btn btn-primary" disabled>Parse</button>&nbsp;
+			<button id="button-request" class="btn btn-primary" disabled style="display:none;">Request</button>
+		</div>
+	</div>
+	<div id="rowTable">
+		<hr/>
+		<div class="row">
+			<h3>Data</h3>
+		</div>
+		<div class="row">
+			<table id="table-output" class="table table-striped" role="grid">
+				<thead>
+					<tr role="row">
+						<th scope="col">#</th>
+						<th scope="col">Status</th>
+						<th scope="col">Search query</th>
+						<th scope="col">Result</th>
+						<th scope="col">Disambiguation</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td colspan="5">No data</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+		<div class="row">
+			<button id="button-output" class="btn btn-primary" disabled style="display:none;">Generate output</button>&nbsp;
+		</div>
+	</div>
+	<div id="rowTable">
+		<hr/>
+		<div class="row d-flex">
+			<h3 style="flex:1">Result</h3>
+			<button id="button-copy" class="btn btn-default" disabled>Copy</button>
+		</div>
+		<div class="row">
+			<textarea id="output" class="form-control" readonly rows="10"></textarea>
+		</div>
+	</div>
+</div>
+
+<div class="modal fade" id="modal-settings" tabindex="-1" role="dialog" aria-labelledby="modal-settings-label" aria-hidden="true">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="modal-settings-label">Advanced Settings</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<table class="table" role="grid">
+					<tbody>
+						<tr>
+							<th scope="row">Search language</th>
+							<td>
+								<input id="setting-language-search" class="form-control custom-select" type="text" list="languages" value="en" />
+							</td>
+						</tr>
+						<tr>
+							<th scope="row">Item description language</th>
+							<td>
+								<input id="setting-language-item" class="form-control custom-select" type="text" list="languages" value="en" />
+							</td>
+						</tr>
+						<tr>
+							<th scope="row">Number of disambiguation candidates</th>
+							<td>
+								<form name="setting-disambiguation-candidatesnumberForm">
+									<input id="setting-disambiguation-candidatesnumber" class="form-control" type="number" value="7" min="1" max="50" />
+								</form>
+							</td>
+						</tr>
+						<datalist id="languages"></datalist>
+					</tbody>
+				</table>
+			</div>
+			<div class="modal-footer">
+				<button id="button-settings-geturl" type="button" class="btn btn-secondary">Get URL</button>
+				<button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="modal fade" id="modal-help" tabindex="-1" role="dialog" aria-labelledby="modal-help-label" aria-hidden="true">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="modal-help-label">Help</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<h3>Help</h3>
+				<p><b>WikiR<span style="color:#bbb;">e</span>solve</b> is a tool for automatically resolving the item ids of a given list of search queries.</p>
+				<h4>Syntax</h4>
+				<p>The syntax of WikiRsolve is based on the one of <a href="https://tools.wmflabs.org/quickstatements/" target="_blank">QuickStatements v1</a> and, if successfull, will be processed to valid QuickStatements v1 statements.</p>
+				<p>A simple query could for example look like:<br/>
+					<code>Wikidata|Q|P31=Q14827288<span class="highlight-tab"></span>operator|P|P1629=Q29933786<span class="highlight-tab"></span>Wikimedia Foundation|Q<span class="highlight-tab"></span>$P275<span class="highlight-tab"></span>$Q6938433</code></p>
+				<p><b>Command lines</b> don't serve a purpose but can be usefull for generating QuickStatements. Each command line consists of at least one 2-tuple or triple, so called item tuples. Multiple item tuples per command are seperated by a single tab.
+				<p>An <b>item tuple</b> can be either a 2-tuple or triple and consists of:</p>
+					<ul><i>Obligatory:</i> The first item of a tuple is the search term.</ul>
+					<ul><i>Obligatory:</i> The second item of a tuple is the expected datatype. Either <code>Q</code> or <code>P</code>.</ul>
+					<ul><i>Optional:</i> The third item is a list of conditions for the expected item. Multiple conditions are separated by commas. This parameter shall be omitted if not required.</ul>
+					<i>Example:</i> <code>Wikidata|Q</code>, <code>Wikidata|Q|P31=Q14827288</code>
+				<p>A <b>literal</b> is a string which will not be processed but output. This can be handy for generating QuickStatements. A literal starts with a dollar sign (<code>$</code>) and is followed by the text.<br/>
+					<i>Example:</i> <code>$Wikidata</code>, <code>$P31</code></p>
+				<p><b>Conditions</b> define which items to automatically ignore. A condition is a 2-tuple and consists of a property and a value seperated by a "equals to"-character (<code>=</code>). For every possible candidate item it's checked whether it has a claim containing the property and whether that property is assigned to the given value. If multiple conditions are declared, seperated by commas (<code>,</code>) every condition has to be fullfilled by a candidate in order to not be ignored.<br/>
+					<i>Example:</i> <code>P275=Q6938433</code>, <code>P275=Q6938433,P31=Q35127</code></p>
+				<h4>Notes</h4>
+				<p>If a query couldn't be resolved the original search query is output surrounded by arrow brackets.
+					<i>Example:</i> <code>&lt;iDontExist&gt;</code></p>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+			</div>
+		</div>
+	</div>
+</div>
+<script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha384-tsQFqpEReu7ZLhBV2VZlAu7zcOV+rXbYlF2cqB8txI/8aZajjp4Bqd+V6D5IgvKT" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js" integrity="sha384-uefMccjFJAIv6A+rW+L4AHf99KvxDjWSu1z9VI8SKNVmz4sk7buKt/6v9KI65qnm" crossorigin="anonymous"></script>
+<script src="data/components/tooltipster/4.0/js/tooltipster.bundle.min.js"></script>
+<script src="data/js/script.js"></script>
+</body>
+</html>

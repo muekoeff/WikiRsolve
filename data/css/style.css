@@ -1,0 +1,77 @@
+textarea {
+	width: 100%;
+}
+.container {
+	max-width: unset;
+	width: calc(100% - 2em);
+}
+.highlight-tab::after {
+	background-color: #ddd;
+	border-radius: 5px;
+	content: 'Tab';
+	margin: 0 .5em;
+	padding: 0 .75em;
+	text-transform: uppercase;
+}
+.modal-dialog {
+	max-width: 85%;
+}
+.status::after {
+	border: 1px solid;
+	border-radius: 5px;
+	margin: 0 .5em;
+	padding: 0 .75em;
+	text-transform: uppercase;
+}
+.status-disambiguation::after {
+	color: #856404;
+	background-color: #fff3cd;
+	border-color: #ffeeba;
+	content: 'Disamb.';
+}
+.status-failed::after {
+	color: #721c24;
+	background-color: #f8d7da;
+	border-color: #f5c6cb;
+	content: 'Failed';
+}
+.status-noresults::after {
+	color: #856404;
+	background-color: #fff3cd;
+	border-color: #ffeeba;
+	content: 'No Results';
+}
+.status-pending::after {
+	background-color: #e2e3e5;
+	border-color: #d6d8db;
+	color: #383d41;
+	content: 'Pending';
+}
+.status-progress::after {
+	color: #0c5460;
+	background-color: #d1ecf1;
+	border-color: #bee5eb;
+	content: '...';
+}
+.status-success::after {
+	color: #155724;
+	background-color: #d4edda;
+	border-color: #c3e6cb;
+	content: 'Success';
+}
+.tooltipster-sidetip.tooltipster-error.tooltipster-left .tooltipster-arrow-background {
+	border-left-color: #f8d7da !important;
+}
+.tooltipster-sidetip.tooltipster-light.tooltipster-left .tooltipster-arrow-border {
+	border-left-color: #f5c6cb !important;
+}
+.tooltipster-sidetip.tooltipster-error .tooltipster-box {
+	background-color: #f8d7da !important;
+	border-color: #f5c6cb !important;
+}
+.tooltipster-sidetip.tooltipster-error .tooltipster-content {
+	color: #721c24 !important;
+}
+.wordhighlight {
+	background-color: rgba(255,255,0,.8);
+}
