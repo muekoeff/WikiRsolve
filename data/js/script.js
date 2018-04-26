@@ -17,6 +17,18 @@ class Settings {
 				}`);
 			}
 		});
+		$("#setting-disambiguation-matchhighlight").change(function(e) {
+			if(this.checked) {
+				Settings.enableConditionalStyle("disambiguation-matchhighlight", `.tool-matchhighlight {
+					background-color: rgba(255,255,0,.8);
+				}`);
+			} else {
+				Settings.disableConditionalStyle("disambiguation-matchhighlight");
+			}
+		});
+
+		$("#setting-candidateremoval").change();
+		$("#setting-disambiguation-matchhighlight").change();
 	}
 	static disableConditionalStyle(name) {
 		var element = $(`style[data-setting='${name}']`);
@@ -30,6 +42,7 @@ class Settings {
 			var settings = {
 				"candidateremoval": $("#setting-candidateremoval").is(":checked"),
 				"disambiguation-candidatesnumber": $("#setting-disambiguation-candidatesnumber").val(),
+				"disambiguation-matchhighlight": $("#setting-disambiguation-matchhighlight").is(":checked"),
 				"language-item": $("#setting-language-item").val(),
 				"language-search": $("#setting-language-search").val()
 			};
@@ -51,7 +64,6 @@ class Settings {
 		}
 	}
 	static initialize() {
-		Settings.attachLiveHandler();
 		$("#button-settings-geturl").click(function(e) {
 			e.preventDefault();
 			Settings.export();
@@ -59,6 +71,7 @@ class Settings {
 
 		Settings.loadLanguages();
 		Settings.load();
+		Settings.attachLiveHandler();
 	}
 	static load() {
 		var query = (new URL(window.location.href)).searchParams.get("settings");
@@ -67,9 +80,10 @@ class Settings {
 				var settings = JSON.parse(query);
 
 				if(typeof settings["candidateremoval"] != "undefined") $("#setting-candidateremoval").prop("checked", settings["candidateremoval"]);
-				$("#setting-candidateremoval").change();
 
 				if(typeof settings["disambiguation-candidatesnumber"] != "undefined") $("#setting-disambiguation-candidatesnumber").val(settings["disambiguation-candidatesnumber"]);
+				if(typeof settings["disambiguation-matchhighlight"] != "undefined") $("#setting-disambiguation-matchhighlight").prop("checked", settings["disambiguation-matchhighlight"]);
+
 				if(typeof settings["language-item"] != "undefined") $("#setting-language-item").val(settings["language-item"]);
 				if(typeof settings["language-search"] != "undefined") $("#setting-language-search").val(settings["language-search"]);
 			} catch(ex) {
@@ -141,7 +155,7 @@ class UiRow {
 			originalWord = _e(originalWord);
 			
 			if(indexOf >= 0) {
-				return `${word.substr(0, indexOf)}<span class="wordhighlight">${word.substr(indexOf, originalWord.length)}</span>${word.substring(indexOf + originalWord.length)}`;
+				return `${word.substr(0, indexOf)}<span class="tool-matchhighlight">${word.substr(indexOf, originalWord.length)}</span>${word.substring(indexOf + originalWord.length)}`;
 			} else {
 				return word;
 			}

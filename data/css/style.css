@@ -72,9 +72,6 @@ textarea {
 .tooltipster-sidetip.tooltipster-error .tooltipster-content {
 	color: #721c24 !important;
 }
-.wordhighlight {
-	background-color: rgba(255,255,0,.8);
-}
 #table-output span.mode-selected {
 	font-style: italic;
 }
