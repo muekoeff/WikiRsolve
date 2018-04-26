@@ -80,19 +80,31 @@ class Tuple {
 	}
 }
 class UiRow {
-	constructor(rowIndex, tupleIndex, tuple, status, disambiguation) {
+	constructor(rowIndex, tupleIndex, tuple, status, disambiguation, disambiguationRaw) {
 		this.rowIndex = rowIndex;
 		this.tupleIndex = tupleIndex;
 		this.tuple = tuple;
 		if(typeof status != "undefined") this.status = status; else this.status = "pending";
 		if(typeof disambiguation != "undefined") this.disambiguation = disambiguation; else this.disambiguation = null;
+		if(typeof disambiguationRaw != "undefined") this.disambiguationRaw = disambiguationRaw; else this.disambiguationRaw = null;
 	}
-	generateDisambiguation(tuple, result) {
+
+	clearResult() {
+		this.tuple.result = null;
+		this.status = "disambiguation";
+		this.generateDisambiguation();
+		this.update();
+	}
+	generateDisambiguation(result) {
 		var output = [];
+		var ui = this;
+
+		if(typeof result == "undefined" && this.disambiguationRaw != null) result = this.disambiguationRaw;
+		if(typeof result != "undefined") this.disambiguationRaw = result;
 
 		$.each(result, function(a, b) {
 			if(b != null) {
-				output.push(`<span title="${b.description || "-"}"><a href="${b.concepturi}" data-item="${b.id}">${getHighlightedWord(b.label, tuple.searchquery)}</a> <small>(${b.id}, ${b.description || "-"})</small> (<a href="${b.concepturi}" target="_blank">Open</a>)</span>`);
+				output.push(`<span class="${ui.tuple.result == b.id ? "mode-selected" : ""}" title="${b.description || "-"}"><a href="${b.concepturi}" data-item="${b.id}">${getHighlightedWord(b.label, ui.tuple.searchquery)}</a> <small>(${b.id}, ${b.description || "-"})</small> <small>[<a href="${b.concepturi}" target="_blank">Open</a>]</small></span>`);
 			}
 		});
 
@@ -117,7 +129,7 @@ class UiRow {
 		return `<th scope="row">${this.rowIndex + 1}</th>
 			<td><span class="status status-${this.status}"></span></td>
 			<td>${_e(this.tuple.searchquery)}</td>
-			<td>${this.tuple.result != null ? `<a href="https://www.wikidata.org/wiki/${this.tuple.result}" target="_blank">${this.tuple.result}</a>` : ""}</td>
+			<td>${this.tuple.result != null ? `<a href="https://www.wikidata.org/wiki/${this.tuple.result}" target="_blank">${this.tuple.result}</a><small class="tool-candidateRemoval">&nbsp;[<a href="#" data-action="remove-candidate">&times;</a>]</small>` : ""}</td>
 			<td>${this.disambiguation || ""}</td>`;
 	}
 	getRow() {
@@ -125,6 +137,7 @@ class UiRow {
 	}
 	update() {
 		this.getRow().html(this.generateInnerRow());
+		attachRemoveListener(this);
 		if(this.disambiguation != null) attachDisambiguationListener(this);
 
 		function attachDisambiguationListener(ui) {
@@ -133,8 +146,15 @@ class UiRow {
 					e.preventDefault();
 					ui.tuple.result = $(this).attr("data-item");
 					ui.status = "success";
+					ui.generateDisambiguation();
 					ui.update();
 				});
+			});
+		}
+		function attachRemoveListener(ui) {
+			$(ui.getRow().find("a[data-action='remove-candidate']")).click(function(e) {
+				e.preventDefault();
+				ui.clearResult();
 			});
 		}
 	}
@@ -346,11 +366,11 @@ function request() {
 			if(items.length == 1) {
 				tuple.ui.status = "success";
 				tuple.result = items[0].id;
-				tuple.ui.generateDisambiguation(tuple, items);
+				tuple.ui.generateDisambiguation(items);
 				tuple.ui.update();
 			} else {
 				tuple.ui.status = "disambiguation";
-				tuple.ui.generateDisambiguation(tuple, items);
+				tuple.ui.generateDisambiguation(items);
 				tuple.ui.update();
 			}
 		}

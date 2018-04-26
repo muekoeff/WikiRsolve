@@ -75,3 +75,9 @@ textarea {
 .wordhighlight {
 	background-color: rgba(255,255,0,.8);
 }
+#table-output span.mode-selected {
+	font-style: italic;
+}
+#table-output span.mode-selected a {
+	font-weight: bold;
+}
