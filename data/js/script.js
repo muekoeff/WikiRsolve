@@ -7,9 +7,28 @@ class Condition {
 	}
 }
 class Settings {
+	static attachLiveHandler() {
+		$("#setting-candidateremoval").change(function(e) {
+			if(this.checked) {
+				Settings.disableConditionalStyle("candidateremoval");
+			} else {
+				Settings.enableConditionalStyle("candidateremoval", `.tool-candidateremoval {
+					display: none;
+				}`);
+			}
+		});
+	}
+	static disableConditionalStyle(name) {
+		var element = $(`style[data-setting='${name}']`);
+		if(element.length != 0) element.remove();
+	}
+	static enableConditionalStyle(name, style) {
+		if($(`style[data-setting='${name}']`).length == 0) $("head").append(`<style data-setting="${name}">${style}</style>`);
+	}
 	static export() {
 		if($("#button-settings-geturl").hasClass("mode-ready")) {
 			var settings = {
+				"candidateremoval": $("#setting-candidateremoval").is(":checked"),
 				"disambiguation-candidatesnumber": $("#setting-disambiguation-candidatesnumber").val(),
 				"language-item": $("#setting-language-item").val(),
 				"language-search": $("#setting-language-search").val()
@@ -32,17 +51,23 @@ class Settings {
 		}
 	}
 	static initialize() {
-		Settings.loadLanguages();
-
+		Settings.attachLiveHandler();
 		$("#button-settings-geturl").click(function(e) {
 			e.preventDefault();
 			Settings.export();
 		});
 
+		Settings.loadLanguages();
+		Settings.load();
+	}
+	static load() {
 		var query = (new URL(window.location.href)).searchParams.get("settings");
 		if(query != null) {
 			try {
 				var settings = JSON.parse(query);
+
+				if(typeof settings["candidateremoval"] != "undefined") $("#setting-candidateremoval").prop("checked", settings["candidateremoval"]);
+				$("#setting-candidateremoval").change();
 
 				if(typeof settings["disambiguation-candidatesnumber"] != "undefined") $("#setting-disambiguation-candidatesnumber").val(settings["disambiguation-candidatesnumber"]);
 				if(typeof settings["language-item"] != "undefined") $("#setting-language-item").val(settings["language-item"]);
@@ -129,7 +154,7 @@ class UiRow {
 		return `<th scope="row">${this.rowIndex + 1}</th>
 			<td><span class="status status-${this.status}"></span></td>
 			<td>${_e(this.tuple.searchquery)}</td>
-			<td>${this.tuple.result != null ? `<a href="https://www.wikidata.org/wiki/${this.tuple.result}" target="_blank">${this.tuple.result}</a><small class="tool-candidateRemoval">&nbsp;[<a href="#" data-action="remove-candidate">&times;</a>]</small>` : ""}</td>
+			<td>${this.tuple.result != null ? `<a href="https://www.wikidata.org/wiki/${this.tuple.result}" target="_blank">${this.tuple.result}</a><small class="tool-candidateremoval">&nbsp;[<a href="#" data-action="remove-candidate">&times;</a>]</small>` : ""}</td>
 			<td>${this.disambiguation || ""}</td>`;
 	}
 	getRow() {
