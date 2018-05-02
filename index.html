@@ -31,7 +31,7 @@
 		</ul>
 	</div>
 </nav>
-<div class="container" style="padding:1em 0">
+<div class="container">
 	<div id="rowTable">
 		<div class="row">
 			<textarea id="commands" class="form-control" rows="10"></textarea>
@@ -151,22 +151,35 @@
 				<h4>Syntax</h4>
 				<p>The syntax of WikiRsolve is based on the one of <a href="https://tools.wmflabs.org/quickstatements/" target="_blank">QuickStatements v1</a> and, if successfull, will be processed to valid QuickStatements v1 statements.</p>
 				<p>A simple query could for example look like:<br/>
-					<code>Wikidata|Q|P31=Q14827288<span class="highlight-tab"></span>operator|P|P1629=Q29933786<span class="highlight-tab"></span>Wikimedia Foundation|Q<span class="highlight-tab"></span>$P275<span class="highlight-tab"></span>$Q6938433</code></p>
-				<p><b>Command lines</b> don't serve a purpose but can be usefull for generating QuickStatements. Each command line consists of at least one 2-tuple or triple, so called item tuples. Multiple item tuples per command are seperated by a single tab.
+					<code>Wikidata||P31=Q14827288<span class="highlight-tab"></span>operator|P|P1629=Q29933786<span class="highlight-tab"></span>Wikimedia Foundation|Q<span class="highlight-tab"></span>$P275<span class="highlight-tab"></span>$Q6938433</code></p>
+				<h5>Command lines</h5>
+				<p><b>Command lines</b> don't serve a purpose but can be usefull for generating QuickStatements. Each command line consists of at least one 2-tuple or triple, so called <i>item tuples</i>. Multiple item tuples per command are seperated by a single tab.
+				<h5>Item tuple</h5>
 				<p>An <b>item tuple</b> can be either a 2-tuple or triple and consists of:</p>
 					<ul><i>Obligatory:</i> The first item of a tuple is the search term.</ul>
-					<ul><i>Obligatory:</i> The second item of a tuple is the expected datatype. Either <code>Q</code> or <code>P</code>.</ul>
-					<ul><i>Optional:</i> The third item is a list of conditions for the expected item. Multiple conditions are separated by commas. This parameter shall be omitted if not required.</ul>
-					<i>Example:</i> <code>Wikidata|Q</code>, <code>Wikidata|Q|P31=Q14827288</code>
+					<ul><i>Optional:</i> The second item of a tuple is the expected datatype. Either <code>Q</code> or <code>P</code>. Defaults to <code>Q</code> if omitted or empty.</ul>
+					<ul><i>Optional:</i> The third item is a list of conditions for the expected item. Multiple conditions are separated by commas.</ul>
+					<i>Example:</i> <code>Wikidata</code>, <code>Wikidata|Q</code>, <code>Wikidata|Q|P31=Q14827288</code>, <code>Wikidata||P31=Q14827288</code>
+				<h5>Literals</h5>
 				<p>A <b>literal</b> is a string which will not be processed but output. This can be handy for generating QuickStatements. A literal starts with a dollar sign (<code>$</code>) and is followed by the text.<br/>
 					<i>Example:</i> <code>$Wikidata</code>, <code>$P31</code></p>
-				<p><b>Conditions</b> define which items to automatically ignore. A condition is a 2-tuple and consists of a property and a value seperated by a "equals to"-character (<code>=</code>). For every possible candidate item it's checked whether it has a claim containing the property and whether that property is assigned to the given value. If multiple conditions are declared, seperated by commas (<code>,</code>) every condition has to be fullfilled by a candidate in order to not be ignored.<br/>
-					<i>Example:</i> <code>P275=Q6938433</code>, <code>P275=Q6938433,P31=Q35127</code></p>
+				<h5>Conditions</h5>
+				<p><b>Conditions</b> define which items to automatically ignore. A condition is a 2-tuple and consists of a property and a value seperated by a certain command-character. Multiple conditions which all have to be fullfilled (AND conditions) can be specified by seperating them with commas (<code>,</code>).</p>
+				<h6>Basic conditions <code>=</code></h6>
+				<p>A <b>basic condition</b> is a 2-tuple and consists of a property and a value seperated by an "equals to"-character (<code>=</code>). A candidate has to have the property and value for the property as defined in the tuple. This does not check for transitive properties.<br/>
+					<i>Example:</i> <code>Wikidata||P275=Q6938433</code>, <code>Wikidata||P275=Q6938433,P31=Q35127</code></p>
+				<h6>Basic conditions - Transitive <code>=</code></h6>
+				<p>A basic condition can be extended to check for transitive properties by appending an "asterisk"-character <code>*</code> to the property.<br/>
+					<i>Example:</i> <code>Treptow-Köpenick||P131*=Q183</code></p>
+				<h6>SPARQL conditions <code>~</code></h6>
+				<p>A <b>SPARQL condition</b> is a 2-tuple and consists of a property and a value seperated by a "tilde"-character (<code>~</code>). They are the most versatile type of conditions and will be set together to <code>?item <i>&lt;property&gt;</i> <i>&lt;value&gt;</i> .</code>. Please note that SPARQL prefixes like "wdt" and "wd" are required.<br/>
+					<i>Example:</i> Filter organs - <code>Heart||wdt:P31/wdt:P279*~wd:Q712378</code></p>
 				<h4>Notes</h4>
 				<p>If a query couldn't be resolved the original search query is output surrounded by arrow brackets.
 					<i>Example:</i> <code>&lt;iDontExist&gt;</code></p>
 				<h4>About</h4>
-				<p>WikiRsolve is made by <a href="https://nw520.de/" target="_blank">nw520</a>.</p>
+				<p>WikiRsolve is made by <a href="https://www.wikidata.org/wiki/User:Naseweis520" target="_blank">nw520</a> <small><a href="https://nw520.de/" target="_blank">(Homepage)</a></small>.<br/>
+					Thanks to <a href="https://www.wikidata.org/wiki/User:Tagishsimon" target="_blank">Tagishsimon</a> for providing me with a <a href="https://www.wikidata.org/wiki/Wikidata:Request_a_query/Archive/2018/05#Check_whether_a_given_list_of_element_IDs_fullfills_certain_criteria_and_return_list_of_matching_items" target="_blank">SPARQL query</a>.</p>
 			</div>
 			<div class="modal-footer">
 				<button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>

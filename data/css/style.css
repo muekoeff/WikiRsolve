@@ -2,8 +2,8 @@ textarea {
 	width: 100%;
 }
 .container {
-	max-width: unset;
-	width: calc(100% - 2em);
+	margin-bottom:1.5em;
+	margin-top:1.5em
 }
 .highlight-tab::after {
 	background-color: #ddd;

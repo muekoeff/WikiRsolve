@@ -1,9 +1,101 @@
 var elements;
 
 class Condition {
-	constructor(property, value) {
+	constructor(mode, property, value) {
+		this.mode = mode;
 		this.property = property;
 		this.value = value;
+	}
+
+	static filterItem(tuple, elements, results, callback) {
+		var elementsNew = elements.slice(0);
+
+		$.ajax({
+			beforeSend: function(request) {
+				request.setRequestHeader("Accept", "application/json, text/plain, */*");
+			},
+			type: "GET",
+			url: `https://query.wikidata.org/sparql?query=${encodeURIComponent(`SELECT ?item ?itemLabel WHERE {
+	VALUES ?item {${resultsToIdList(results).join(" ")}}
+	${generateConditions(tuple).join("")}
+	SERVICE wikibase:label { bd:serviceParam wikibase:language "${$("#setting-language-item").val().toLowerCase()},en". }
+	}`)}`
+		}).done(function(e) {
+			var sparqlMatches = sparqlResultToIdList(e);
+			$.each(elements, function(index, candidate) {
+				if(sparqlMatches.indexOf(candidate.id) > -1) {
+					extendData(elementsNew[index], results.entities[candidate.id]);
+				} else {
+					elementsNew[index] = null;
+				}
+			});
+			callback(elementsNew.filter(function(n) {	// Filter out 'null'
+				return n != null;
+			}));
+		}).fail(function(e) {
+			console.error(e);
+			callback(elements);	// Don't filter
+		});
+
+		function generateConditions(tuple) {
+			var rules = [];
+			$.each(tuple.conditions, function(a, b) {
+				switch(b.mode) {
+					case "=":
+						rules.push(`?item wdt:${b.property} wd:${b.value} .`);
+						break;
+					case "~":
+						rules.push(`?item ${b.property} ${b.value} .`);
+						break;
+				}
+			});
+			return rules;
+		}
+		function sparqlResultToIdList(results) {
+			var idList = [];
+			$.each(results.results.bindings, function(a, b) {
+				idList.push(b.item.value.replace("http://www.wikidata.org/entity/", ""));
+			});
+			return idList;
+		}
+		function resultsToIdList(results) {
+			var idList = [];
+			$.each(results.entities, function(index, candidate) {
+				idList.push(`wd:${candidate.id}`);
+			});
+			return idList;
+		}
+	}
+	static filterItems(tuple, elements, callback) {
+		var ids = [];
+		$.each(elements, function(index, item) {
+			ids.push(item.id);
+		});
+
+		$.ajax(`https://www.wikidata.org/w/api.php?action=wbgetentities&format=json&languages=${$("#setting-language-item").val().toLowerCase()}|en&origin=*&ids=${ids.join("|")}`
+		).done(function(e) {
+			if(tuple.conditions.length > 0) {
+				Condition.filterItem(tuple, elements, e, callback);
+			} else {
+				callback(elements);
+			}
+		}).fail(function(e) {
+			console.error(e);
+			callback(elements);
+		});
+	}
+	static parse(conditions) {
+		var rules = [];
+		$.each(conditions.split(","), function(ruleIndex, ruleTerm) {
+			if(ruleTerm.split("=").length == 2) {
+				var pair = ruleTerm.split("=");
+				rules.push(new Condition("=", pair[0], pair[1]));
+			} else if(ruleTerm.split("~").length == 2) {
+				var pair = ruleTerm.split("~");
+				rules.push(new Condition("~", pair[0], pair[1]));
+			}
+		});
+		return rules;
 	}
 }
 class Settings {
@@ -103,9 +195,8 @@ class Settings {
 class Tuple {
 	constructor(searchquery, type, conditions) {
 		this.searchquery = searchquery;
-		
-		if(typeof type != "undefined") this.type = type; else this.type = "q";
-		if(typeof conditions != "undefined") this.conditions = conditions;
+		if(typeof type != "undefined" && type !== "") this.type = type; else this.type = "q";
+		if(typeof conditions != "undefined" && conditions !== "") this.conditions = conditions; else this.conditions = [];
 
 		this.result = null;
 	}
@@ -116,6 +207,36 @@ class Tuple {
 	validate() {
 		if(this.type.toLowerCase() != "p" && this.type.toLowerCase() != "q") return false;
 		return true;
+	}
+}
+class Utils {
+	static copyTextToClipboard(text) {
+		var textArea = document.createElement("textarea");
+
+		textArea.style.position = 'fixed';
+		textArea.style.top = 0;
+		textArea.style.left = 0;
+		textArea.style.width = '2em';
+		textArea.style.height = '2em';
+		textArea.style.padding = 0;
+		textArea.style.border = 'none';
+		textArea.style.outline = 'none';
+		textArea.style.boxShadow = 'none';
+		textArea.style.background = 'transparent';
+		textArea.value = text;
+		document.body.appendChild(textArea);
+		textArea.select();
+
+		try {
+			document.execCommand('copy');
+		} catch(e) {
+			console.error(e);
+		}
+
+		document.body.removeChild(textArea);
+	}
+	static validateNumber(i, fallback) {
+		return (isNaN(i) ? fallback : i);
 	}
 }
 class UiRow {
@@ -146,7 +267,6 @@ class UiRow {
 				output.push(`<span class="${ui.tuple.result == b.id ? "mode-selected" : ""}" title="${b.description || "-"}"><a href="${b.concepturi}" data-item="${b.id}">${getHighlightedWord(b.label, ui.tuple.searchquery)}</a> <small>(${b.id}, ${b.description || "-"})</small> <small>[<a href="${b.concepturi}" target="_blank">Open</a>]</small></span>`);
 			}
 		});
-
 		this.tuple.ui.disambiguation = output.join("<br/>");
 
 		function getHighlightedWord(word, originalWord) {
@@ -202,7 +322,7 @@ class UiRow {
 jQuery(document).ready(function($) {
 	$("#button-copy").click(function(e) {
 		e.preventDefault();
-		copyTextToClipboard($("#output").val());
+		Utils.copyTextToClipboard($("#output").val());
 	});
 	$("#button-output").click(function(e) {
 		e.preventDefault();
@@ -220,30 +340,11 @@ jQuery(document).ready(function($) {
 	Settings.initialize();
 });
 
-function copyTextToClipboard(text) {
-	var textArea = document.createElement("textarea");
+function extendData(oldItem, newItem) {
+	var langCode = $("#setting-language-item").val().toLowerCase();
 
-	textArea.style.position = 'fixed';
-	textArea.style.top = 0;
-	textArea.style.left = 0;
-	textArea.style.width = '2em';
-	textArea.style.height = '2em';
-	textArea.style.padding = 0;
-	textArea.style.border = 'none';
-	textArea.style.outline = 'none';
-	textArea.style.boxShadow = 'none';
-	textArea.style.background = 'transparent';
-	textArea.value = text;
-	document.body.appendChild(textArea);
-	textArea.select();
-
-	try {
-		document.execCommand('copy');
-	} catch(e) {
-		console.error(e);
-	}
-
-	document.body.removeChild(textArea);
+	if(typeof newItem.descriptions[langCode] != "undefined") oldItem.description = newItem.descriptions[langCode].value;
+	if(typeof newItem.labels[langCode] != "undefined") oldItem.label = newItem.labels[langCode].value;
 }
 function generateOutput(elements) {
 	var rows = [];
@@ -292,25 +393,19 @@ function parse() {
 	});
 	generateTable(elements);
 
-	function parseConditions(conditions) {
-		var rules = [];
-		$.each(conditions.split(","), function(ruleIndex, ruleTerm) {
-			var pair = ruleTerm.split("=");
-			rules.push(new Condition(pair[0], pair[1]));
-		});
-
-		return rules;
-	}
 	function parseItem(tuple) {
 		if(tuple.startsWith("$")) {
 			return tuple;
 		} else {
 			var parts = tuple.split("|");
 			if(parts.length == 3) {
-				var tuple = new Tuple(parts[0], parts[1], parseConditions(parts[2]));
+				var tuple = new Tuple(parts[0], parts[1], Condition.parse(parts[2]));
 				if(tuple.validate()) return tuple;
 			} else if(parts.length == 2) {
 				var tuple = new Tuple(parts[0], parts[1]);
+				if(tuple.validate()) return tuple;
+			} else if(parts.length == 1) {
+				var tuple = new Tuple(parts[0]);
 				if(tuple.validate()) return tuple;
 			}
 		}
@@ -331,69 +426,17 @@ function request() {
 		});
 	});
 
-	function filterItems(tuple, elements, callback) {
-		var elementsNew = elements.slice(0);
-		var ids = [];
-		$.each(elements, function(index, item) {
-			ids.push(item.id);
-		});
-
-		$.ajax(`https://www.wikidata.org/w/api.php?action=wbgetentities&format=json&languages=${$("#setting-language-item").val().toLowerCase()}|en&origin=*&ids=${ids.join("|")}`
-		).done(function(e) {
-			$.each(elements, function(index, candidate) {
-				if(!filterItem(tuple, e.entities[candidate.id])) {
-					elementsNew[index] = null;
-				} else {
-					extendData(elementsNew[index], e.entities[candidate.id]);
-				}
-			});
-			callback(elementsNew.filter(function(n) {	// Filter out 'null'
-				return n != null;
-			}));
-		}).fail(function(e) {
-			console.error(e);
-			callback(elementsNew);
-		});
-
-		function filterItem(tuple, item) {
-			var endresult = true;
-
-			$.each(tuple.conditions, function(index, condition) {
-				if(typeof item.claims[condition.property] != "undefined") {
-					if(!claimCheck(item.claims[condition.property], condition.value)) {
-						endresult = false;
-						return;
-					}
-				} else {
-					endresult = false;
-					return;
-				}
-			});
-			return endresult;
-
-			function claimCheck(claims, target) {
-				var endresult = false;
-				$.each(claims, function(index, claim) {
-					if(claim.mainsnak.datavalue.value.id == target)	{
-						endresult = true;
-						return;
-					}
-				});
-				return endresult;
-			}
-		}
-	}
 	function performRequest(tuple, rowIndex, tupleIndex) {
 		tuple.ui.status = "progress";
 		tuple.ui.update();
 
-		$.ajax(`https://www.wikidata.org/w/api.php?action=wbsearchentities&format=json&language=${$("#setting-language-search").val()}&limit=${validateNumber($("#setting-disambiguation-candidatesnumber").val(), 7)}&origin=*&type=${tuple.type.toLowerCase() == "q" ? "item" : "property"}&search=${tuple.searchquery}`
+		$.ajax(`https://www.wikidata.org/w/api.php?action=wbsearchentities&format=json&language=${$("#setting-language-search").val()}&limit=${Utils.validateNumber($("#setting-disambiguation-candidatesnumber").val(), 7)}&origin=*&type=${tuple.type.toLowerCase() == "q" ? "item" : "property"}&search=${tuple.searchquery}`
 		).done(function(e) {
 			if(e.search.length == 0) {
 				tuple.ui.status = "noresults";
 				tuple.ui.update();
 			} else {
-				filterItems(tuple, e.search, finalize);
+				Condition.filterItems(tuple, e.search, finalize);
 			}
 		}).fail(function(e) {
 			tuple.ui.status = "failed";
@@ -414,18 +457,13 @@ function request() {
 			}
 		}
 	}
-	function extendData(oldItem, newItem) {
-		var langCode = $("#setting-language-item").val().toLowerCase();
-
-		// Description
-		if(typeof newItem.descriptions[langCode] != "undefined") oldItem.description = newItem.descriptions[langCode].value;
-
-		if(typeof newItem.labels[langCode] != "undefined") oldItem.label = newItem.labels[langCode].value;
-	}
 }
-function validateNumber(i, fallback) {
-	return (isNaN(i) ? fallback : i);
-}
+/**
+ * Sanitises a given string
+ *
+ * @param	string	text	Text to sanitise
+ * @return	string	Sanitised string
+ */
 function _e(text) {
 	return $('<div/>').text(text).html();
 }
