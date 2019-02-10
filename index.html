@@ -12,7 +12,7 @@
 </head>
 
 <body>
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
 	<a class="navbar-brand" href="#">WikiRsolve</a>
 	<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggler" aria-controls="navbarToggler" aria-expanded="false" aria-label="Toggle navigation">
 		<span class="navbar-toggler-icon"></span>
@@ -23,7 +23,10 @@
 				<a class="nav-link" href="#" data-toggle="modal" data-target="#modal-settings">Settings</a>
 			</li>
 			<li class="nav-item">
-				<a class="nav-link" href="https://github.com/naseweis520/WikiRsolve" target="_blank">Git</a>
+				<a class="nav-link" href="https://github.com/naseweis520/WikiRsolve" target="_blank">GitHub</a>
+			</li>
+			<li class="nav-item">
+				<a class="nav-link" href="https://tools.wmflabs.org/quickstatements/#/batch" target="_blank">QuickStatements</a>
 			</li>
 			<li class="nav-item">
 				<a class="nav-link" href="#" data-toggle="modal" data-target="#modal-help">Help</a>
@@ -39,11 +42,10 @@
 		<br />
 		<div class="row">
 			<button id="button-parse" class="btn btn-primary" disabled>Parse</button>&nbsp;
-			<button id="button-request" class="btn btn-primary" disabled style="display:none;">Request</button>
+			<button id="button-request" class="btn btn-primary" disabled style="display:none">Request</button>
 		</div>
 	</div>
-	<div id="rowTable">
-		<hr/>
+	<div id="rowTable" style="margin-top:1.5em">
 		<div class="row">
 			<h3>Data</h3>
 		</div>
@@ -66,11 +68,10 @@
 			</table>
 		</div>
 		<div class="row">
-			<button id="button-output" class="btn btn-primary" disabled style="display:none;">Generate output</button>&nbsp;
+			<button id="button-output" class="btn btn-primary" disabled style="display:none">Generate output</button>&nbsp;
 		</div>
 	</div>
-	<div id="rowTable">
-		<hr/>
+	<div id="rowTable" style="margin-top:1.5em">
 		<div class="row d-flex">
 			<h3 style="flex:1">Result</h3>
 			<button id="button-copy" class="btn btn-default" disabled>Copy</button>
@@ -147,7 +148,7 @@
 			</div>
 			<div class="modal-body">
 				<h3>Help</h3>
-				<p><b>WikiR<span style="color:#bbb;">e</span>solve</b> is a tool for automatically resolving the item ids of a given list of search queries.</p>
+				<p><b>WikiR<span style="color:#bbb">e</span>solve</b> is a tool for automatically resolving the item ids of a given list of search queries.</p>
 				<h4>Syntax</h4>
 				<p>The syntax of WikiRsolve is based on the one of <a href="https://tools.wmflabs.org/quickstatements/" target="_blank">QuickStatements v1</a> and, if successfull, will be processed to valid QuickStatements v1 statements.</p>
 				<p>A simple query could for example look like:<br/>
@@ -178,7 +179,7 @@
 				<p>If a query couldn't be resolved the original search query is output surrounded by arrow brackets.
 					<i>Example:</i> <code>&lt;iDontExist&gt;</code></p>
 				<h4>About</h4>
-				<p>WikiRsolve is made by <a href="https://www.wikidata.org/wiki/User:Naseweis520" target="_blank">nw520</a> <small><a href="https://nw520.de/" target="_blank">(Homepage)</a></small>.<br/>
+				<p>WikiRsolve is made by <a href="https://www.wikidata.org/wiki/User:Nw520" target="_blank">nw520</a> <small><a href="https://nw520.de/" target="_blank">(Homepage)</a></small>.<br/>
 					Thanks to <a href="https://www.wikidata.org/wiki/User:Tagishsimon" target="_blank">Tagishsimon</a> for providing me with a <a href="https://www.wikidata.org/wiki/Wikidata:Request_a_query/Archive/2018/05#Check_whether_a_given_list_of_element_IDs_fullfills_certain_criteria_and_return_list_of_matching_items" target="_blank">SPARQL query</a>.</p>
 			</div>
 			<div class="modal-footer">

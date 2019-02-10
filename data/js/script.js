@@ -214,7 +214,7 @@ class Settings {
 			$("#button-settings-geturl").tooltipster({
 				content: "Clicking again on this button will redirect you to a new url which has your settings stored. This url can be bookmarked. However, your current entries in the input textbox will be gone once redirected.",
 				functionAfter: function() {
-				$("#button-settings-geturl").removeClass("mode-ready");
+					$("#button-settings-geturl").removeClass("mode-ready");
 				},
 				functionBefore: function() {
 					$("#button-settings-geturl").addClass("mode-ready");
