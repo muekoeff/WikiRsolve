@@ -1,5 +1,3 @@
-var elements;
-
 class Condition {
 	constructor(mode, property, value) {
 		this.mode = mode;
@@ -14,12 +12,11 @@ class Condition {
 			beforeSend: function(request) {
 				request.setRequestHeader("Accept", "application/json, text/plain, */*");
 			},
+			data: {
+				"query": `SELECT ?item ?itemLabel WHERE { VALUES ?item {${resultsToIdList(results).join(" ")}} ${generateConditions(tuple).join("")} SERVICE wikibase:label { bd:serviceParam wikibase:language "${$("#setting-language-item").val().toLowerCase()},en". } }`
+			},
 			type: "GET",
-			url: `https://query.wikidata.org/sparql?query=${encodeURIComponent(`SELECT ?item ?itemLabel WHERE {
-	VALUES ?item {${resultsToIdList(results).join(" ")}}
-	${generateConditions(tuple).join("")}
-	SERVICE wikibase:label { bd:serviceParam wikibase:language "${$("#setting-language-item").val().toLowerCase()},en". }
-	}`)}`
+			url: "https://query.wikidata.org/sparql"
 		}).done(function(e) {
 			var sparqlMatches = sparqlResultToIdList(e);
 			$.each(elements, function(index, candidate) {
@@ -72,8 +69,16 @@ class Condition {
 			ids.push(item.id);
 		});
 
-		$.ajax(`https://www.wikidata.org/w/api.php?action=wbgetentities&format=json&languages=${$("#setting-language-item").val().toLowerCase()}|en&origin=*&ids=${ids.join("|")}`
-		).done(function(e) {
+		$.ajax({
+			data: {
+				"action": "wbgetentities",
+				"format": "json",
+				"languages": `${$("#setting-language-item").val().toLowerCase()}|en`,
+				"origin": "*",
+				"ids": ids.join("|")
+			},
+			url: "https://www.wikidata.org/w/api.php"
+		}).done(function(e) {
 			if(tuple.conditions.length > 0) {
 				Condition.filterItem(tuple, elements, e, callback);
 			} else {
@@ -96,6 +101,72 @@ class Condition {
 			}
 		});
 		return rules;
+	}
+}
+class RequestQueue {
+	constructor(max) {
+		this.max = (max || 5);
+		this.nextPointer = 0;
+		this.queue = [];
+		this.performing = 0;
+	}
+	enqueueRequest(tuple, rowIndex, tupleIndex) {
+		this.queue.push([tuple, rowIndex, tupleIndex]);
+		this.work();
+	}
+	work() {
+		if(this.max > this.performing) {
+			if(this.queue[this.nextPointer] === undefined) {
+				console.debug("Queue finished");
+				this.nextPointer = 0;
+				this.queue = [];
+				this.performing = 0;
+			} else {
+				var next = this.queue[this.nextPointer];
+				this.nextPointer += 1;
+				this._performRequest(next[0], next[1], next[2]);
+			}
+		}
+	}
+	_finishRequest() {
+		this.performing -= 1;
+		this.work();
+	}
+	_performRequest(tuple, rowIndex, tupleIndex) {
+		var this_rq = this;
+
+		this.performing += 1;
+		tuple.ui.status = "progress";
+		tuple.ui.update();
+
+		$.ajax(`https://www.wikidata.org/w/api.php?action=wbsearchentities&format=json&language=${$("#setting-language-search").val()}&limit=${Utils.validateNumber($("#setting-disambiguation-candidatesnumber").val(), 7)}&origin=*&type=${tuple.type.toLowerCase() == "q" ? "item" : "property"}&search=${tuple.searchquery}`
+		).always(function(e) {
+			this_rq._finishRequest();
+		}).done(function(e) {
+			if(e.search.length == 0) {
+				tuple.ui.status = "noresults";
+				tuple.ui.update();
+			} else {
+				Condition.filterItems(tuple, e.search, finalize);
+			}
+		}).fail(function(e) {
+			tuple.ui.status = "failed";
+			tuple.ui.update();
+			console.error(e);
+		});
+
+		function finalize(items) {
+			if(items.length == 1) {
+				tuple.ui.status = "success";
+				tuple.result = items[0].id;
+				tuple.ui.generateDisambiguation(items);
+				tuple.ui.update();
+			} else {
+				tuple.ui.status = "disambiguation";
+				tuple.ui.generateDisambiguation(items);
+				tuple.ui.update();
+			}
+		}
 	}
 }
 class Settings {
@@ -318,6 +389,8 @@ class UiRow {
 		}
 	}
 }
+var elements;
+var requestQueue = new RequestQueue();
 
 jQuery(document).ready(function($) {
 	$("#button-copy").click(function(e) {
@@ -411,52 +484,24 @@ function parse() {
 		}
 	}
 	function parseRow(row) {
-		var items = [];
-		$.each(row.split("\t"), function(a, b) {
-			var parse = parseItem(b);
-			if(typeof parse != "undefined" && parse !== null) items.push(parse);
-		});
-		return items;
+		if(row === "") {
+			return null;
+		} else {
+			var items = [];
+			$.each(row.split("\t"), function(a, b) {
+				var parse = parseItem(b);
+				if(typeof parse != "undefined" && parse !== null) items.push(parse);
+			});
+			return items;
+		}
 	}
 }
 function request() {
 	$.each(elements, function(rowIndex, row) {
 		$.each(row, function(tupleIndex, tuple) {
-			if(typeof tuple != "string") performRequest(tuple, rowIndex, tupleIndex);
+			if(typeof tuple != "string") requestQueue.enqueueRequest(tuple, rowIndex, tupleIndex);
 		});
 	});
-
-	function performRequest(tuple, rowIndex, tupleIndex) {
-		tuple.ui.status = "progress";
-		tuple.ui.update();
-
-		$.ajax(`https://www.wikidata.org/w/api.php?action=wbsearchentities&format=json&language=${$("#setting-language-search").val()}&limit=${Utils.validateNumber($("#setting-disambiguation-candidatesnumber").val(), 7)}&origin=*&type=${tuple.type.toLowerCase() == "q" ? "item" : "property"}&search=${tuple.searchquery}`
-		).done(function(e) {
-			if(e.search.length == 0) {
-				tuple.ui.status = "noresults";
-				tuple.ui.update();
-			} else {
-				Condition.filterItems(tuple, e.search, finalize);
-			}
-		}).fail(function(e) {
-			tuple.ui.status = "failed";
-			tuple.ui.update();
-			console.error(e);
-		});
-
-		function finalize(items) {
-			if(items.length == 1) {
-				tuple.ui.status = "success";
-				tuple.result = items[0].id;
-				tuple.ui.generateDisambiguation(items);
-				tuple.ui.update();
-			} else {
-				tuple.ui.status = "disambiguation";
-				tuple.ui.generateDisambiguation(items);
-				tuple.ui.update();
-			}
-		}
-	}
 }
 /**
  * Sanitises a given string
