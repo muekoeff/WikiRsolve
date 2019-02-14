@@ -77,7 +77,15 @@
 			<button id="button-copy" class="btn btn-default" disabled>Copy</button>
 		</div>
 		<div class="row">
-			<textarea id="output" class="form-control" readonly rows="10"></textarea>
+			<textarea id="output" class="form-control" readonly rows="5"></textarea>
+		</div>
+	</div>
+	<div id="rowTable" style="margin-top:1.5em">
+		<div class="row d-flex">
+			<h3>Failed</h3>
+		</div>
+		<div class="row">
+			<textarea id="output-failed" class="form-control" readonly rows="1"></textarea>
 		</div>
 	</div>
 </div>
@@ -175,9 +183,6 @@
 				<h6>SPARQL conditions <code>~</code></h6>
 				<p>A <b>SPARQL condition</b> is a 2-tuple and consists of a property and a value seperated by a "tilde"-character (<code>~</code>). They are the most versatile type of conditions and will be set together to <code>?item <i>&lt;property&gt;</i> <i>&lt;value&gt;</i> .</code>. Please note that SPARQL prefixes like "wdt" and "wd" are required.<br/>
 					<i>Example:</i> Filter organs - <code>Heart||wdt:P31/wdt:P279*~wd:Q712378</code></p>
-				<h4>Notes</h4>
-				<p>If a query couldn't be resolved the original search query is output surrounded by arrow brackets.
-					<i>Example:</i> <code>&lt;iDontExist&gt;</code></p>
 				<h4>About</h4>
 				<p>WikiRsolve is made by <a href="https://www.wikidata.org/wiki/User:Nw520" target="_blank">nw520</a> <small><a href="https://nw520.de/" target="_blank">(Homepage)</a></small>.<br/>
 					Thanks to <a href="https://www.wikidata.org/wiki/User:Tagishsimon" target="_blank">Tagishsimon</a> for providing me with a <a href="https://www.wikidata.org/wiki/Wikidata:Request_a_query/Archive/2018/05#Check_whether_a_given_list_of_element_IDs_fullfills_certain_criteria_and_return_list_of_matching_items" target="_blank">SPARQL query</a>.</p>

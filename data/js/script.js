@@ -421,18 +421,30 @@ function extendData(oldItem, newItem) {
 }
 function generateOutput(elements) {
 	var rows = [];
+	var rows_failed = [];
 	$.each(elements, function(rowIndex, row) {
 		var tuples = [];
+		var failed = false;
 		$.each(row, function(tupleIndex, tuple) {
 			if(typeof tuple == "string") {
 				tuples.push(tuple.substring(1));
 			} else {
-				tuples.push((tuple.result != null ? tuple.result : `<${tuple.searchquery}>`));
+				if(tuple.result != null) {
+					tuples.push(tuple.result);
+				} else {
+					tuples.push(tuple.searchquery);
+					failed = true;
+				}
 			}
 		});
-		rows.push(tuples.join("\t"));
+		if(failed) {
+			rows_failed.push(tuples.join("\t"));
+		} else {
+			rows.push(tuples.join("\t"));
+		}
 	});
 	$("#output").val(rows.join("\n"));
+	$("#output-failed").val(rows_failed.join("\n"));
 	$("#button-copy").removeAttr("disabled");
 }
 function generateTable(elements) {
