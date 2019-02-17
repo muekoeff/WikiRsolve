@@ -91,15 +91,19 @@ class Condition {
 	}
 	static parse(conditions) {
 		var rules = [];
-		$.each(conditions.split(","), function(ruleIndex, ruleTerm) {
-			if(ruleTerm.split("=").length == 2) {
-				var pair = ruleTerm.split("=");
-				rules.push(new Condition("=", pair[0], pair[1]));
-			} else if(ruleTerm.split("~").length == 2) {
-				var pair = ruleTerm.split("~");
-				rules.push(new Condition("~", pair[0], pair[1]));
-			}
-		});
+		if(conditions.startsWith("^")) {
+			rules.push(new Condition("^", "", conditions.substr(1)));
+		} else {
+			$.each(conditions.split(","), function(ruleIndex, ruleTerm) {
+				if(ruleTerm.split("=").length == 2) {
+					var pair = ruleTerm.split("=");
+					rules.push(new Condition("=", pair[0], pair[1]));
+				} else if(ruleTerm.split("~").length == 2) {
+					var pair = ruleTerm.split("~");
+					rules.push(new Condition("~", pair[0], pair[1]));
+				}
+			});
+		}
 		return rules;
 	}
 }
@@ -134,27 +138,48 @@ class RequestQueue {
 	}
 	_performRequest(tuple, rowIndex, tupleIndex) {
 		var this_rq = this;
-
 		this.performing += 1;
 		tuple.ui.status = "progress";
 		tuple.ui.update();
 
-		$.ajax(`https://www.wikidata.org/w/api.php?action=wbsearchentities&format=json&language=${$("#setting-language-search").val()}&limit=${Utils.validateNumber($("#setting-disambiguation-candidatesnumber").val(), 7)}&origin=*&type=${tuple.type.toLowerCase() == "q" ? "item" : "property"}&search=${tuple.searchquery}`
-		).always(function(e) {
-			this_rq._finishRequest();
-		}).done(function(e) {
-			if(e.search.length == 0) {
-				tuple.ui.status = "noresults";
+		if(tuple.conditions.length == 1 && tuple.conditions[0].mode == "^") {
+			// @TODO
+			$.ajax(`https://de.wikipedia.org/w/api.php?action=query&format=json&prop=pageprops&ppprop=wikibase_item&redirects=1&titles=${encodeURIComponent(tuple.searchquery)}&origin=*`
+			).always(function(e) {
+				this_rq._finishRequest();
+			}).done(function(e) {
+				console.debug(e);
+				if(Object.keys(e.query.pages)[0] == "-1") {
+					tuple.ui.status = "noresults";
+					tuple.ui.update();
+				} else {
+					tuple.ui.status = "success";
+					tuple.result = e.query.pages[Object.keys(e.query.pages)[0]].pageprops.wikibase_item;
+					tuple.ui.update();
+				}
+			}).fail(function(e) {
+				tuple.ui.status = "failed";
 				tuple.ui.update();
-			} else {
-				Condition.filterItems(tuple, e.search, finalize);
-			}
-		}).fail(function(e) {
-			tuple.ui.status = "failed";
-			tuple.ui.update();
-			console.error(e);
-		});
-
+				console.error(e);
+			});
+		} else {
+			$.ajax(`https://www.wikidata.org/w/api.php?action=wbsearchentities&format=json&language=${$("#setting-language-search").val()}&limit=${Utils.validateNumber($("#setting-disambiguation-candidatesnumber").val(), 7)}&origin=*&type=${tuple.type.toLowerCase() == "q" ? "item" : "property"}&search=${tuple.searchquery}`
+			).always(function(e) {
+				this_rq._finishRequest();
+			}).done(function(e) {
+				if(e.search.length == 0) {
+					tuple.ui.status = "noresults";
+					tuple.ui.update();
+				} else {
+					Condition.filterItems(tuple, e.search, finalize);
+				}
+			}).fail(function(e) {
+				tuple.ui.status = "failed";
+				tuple.ui.update();
+				console.error(e);
+			});
+		}
+			
 		function finalize(items) {
 			if(items.length == 1) {
 				tuple.ui.status = "success";
