@@ -194,9 +194,9 @@
 				<p>A <b>basic condition</b> can be extended to check for transitive properties by appending an "asterisk"-character <code>*</code> to the property.<br/>
 					<i>Example:</i> <code>Treptow-Köpenick||P131*=Q183</code></p>
 
-				<h5>Wikipedia Article name <code>^</code></h5>
-				<p>This condition is currently work in progress and only works with the German Wikipedia at the moment.<br/>
-					<i>Example:</i> <code>Platooning||^w:de</code></p>
+				<h5>Wiki article name <code>^</code></h5>
+				<p>This condition can extract the associated Wikidata ID from a given wiki article. A list of all wiki abbreviations can be found <a href="https://www.wikidata.org/w/api.php?action=help&modules=wbgetentities" target="_blank" rel="nofollow noopener">here</a> next to "Sites".<br/>
+					<i>Example:</i> <code>Platooning||^enwiki</code></p>
 
 				<h5>SPARQL conditions <code>~</code></h5>
 				<p>A <b>SPARQL condition</b> consists of a property and a value seperated by a "tilde"-character (<code>~</code>). They are the most versatile type of conditions and will be set together to <code>?item <i>&lt;property&gt;</i> <i>&lt;value&gt;</i> .</code>. Please note that SPARQL prefixes like "wdt" and "wd" are required.<br/>
