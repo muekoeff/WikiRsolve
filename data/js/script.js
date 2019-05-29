@@ -498,9 +498,17 @@ function generateOutput(elements) {
 			rows.push(tuples.join("\t"));
 		}
 	});
-	$("#output").val(rows.join("\n"));
+	var output = rows.join("\n");
+	$("#output").val(output);
 	$("#output-failed").val(rows_failed.join("\n"));
 	$("#button-copy").removeAttr("disabled");
+	// Display WikiCompare-button only if list of Wikidata IDs
+	if(/^Q[0-9]+(\nQ[0-9]+)*$/.test(output)) {
+		$("#button-wikicompare").attr("href", `https://nw520.github.io/WikiCompare/?f&r&i=${encodeURIComponent(rows.join(","))}`).show();
+	} else {
+		$("#button-wikicompare").hide();
+	}
+
 }
 function generateTable(elements) {
 	var output = "";
