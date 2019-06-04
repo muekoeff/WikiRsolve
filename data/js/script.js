@@ -452,6 +452,11 @@ jQuery(document).ready(function($) {
 		e.preventDefault();
 		Utils.copyTextToClipboard($("#output").val());
 	});
+	$("#button-copyquickstatements").click(function(e) {
+		e.preventDefault();
+		Utils.copyTextToClipboard($("#output").val());
+		window.open("https://tools.wmflabs.org/quickstatements/");
+	});
 	$("#button-output").click(function(e) {
 		e.preventDefault();
 		generateOutput(elements);
@@ -502,6 +507,7 @@ function generateOutput(elements) {
 	$("#output").val(output);
 	$("#output-failed").val(rows_failed.join("\n"));
 	$("#button-copy").removeAttr("disabled");
+	$("#button-copyquickstatements").removeAttr("disabled");
 	// Display WikiCompare-button only if list of Wikidata IDs
 	if(/^Q[0-9]+(\nQ[0-9]+)*$/.test(output)) {
 		$("#button-wikicompare").attr("href", `https://nw520.github.io/WikiCompare/?f&r&i=${encodeURIComponent(rows.join(","))}`).show();
