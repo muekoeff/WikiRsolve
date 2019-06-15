@@ -59,6 +59,17 @@ textarea {
 	border-color: #c3e6cb;
 	content: 'Success';
 }
+html.stickyfooter {
+	height: 100%;
+}
+.stickyfooter body {
+	display: flex;
+	flex-direction: column;
+	min-height: 100%;
+}
+.stickyfooter main {
+	flex: 1;
+}
 .tooltipster-sidetip.tooltipster-error.tooltipster-left .tooltipster-arrow-background {
 	border-left-color: #f8d7da !important;
 }

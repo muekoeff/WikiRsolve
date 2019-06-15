@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html class="stickyfooter" lang="en">
 <head>
 <meta charset="utf-8" />
 <meta content="nw520" name="author" />
@@ -19,11 +19,12 @@
 	</button>
 	<div class="collapse navbar-collapse" id="navbarToggler">
 		<ul class="nav navbar-nav">
-			<li class="nav-item">
-				<a class="nav-link" href="https://nw520.github.io/WikiCompare/" rel="nofollow noopener">WikiCompare</a>
-			</li>
-			<li class="nav-item">
-				<a class="nav-link" href="https://github.com/nw520/WikiRsolve" target="_blank" rel="nofollow noopener">GitHub</a>
+			<li class="nav-item dropdown">
+				<a class="nav-link dropdown-toggle" href="#" id="navitem-tools" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">More Wikidata tools</a>
+				<div class="dropdown-menu" aria-labelledby="navitem-tools">
+					<a class="dropdown-item" href="https://nw520.github.io/WikiCompare/" rel="nofollow noopener">WikiCompare</a>
+					<a class="dropdown-item" href="https://nw520.github.io/WikiOSMerged/" rel="nofollow noopener">WikiOSMerged</a>
+				</div>
 			</li>
 			<li class="nav-item">
 				<a class="nav-link" href="https://tools.wmflabs.org/quickstatements/#/batch" rel="nofollow noopener">QuickStatements</a>
@@ -37,7 +38,7 @@
 		</ul>
 	</div>
 </nav>
-<div class="container">
+<main class="container">
 	<div id="rowTable">
 		<div class="row">
 			<textarea id="commands" class="form-control" rows="10"></textarea>
@@ -80,9 +81,14 @@
 	<div id="rowTable" style="margin-top:1.5em">
 		<div class="row d-flex">
 			<h3 style="flex:1">Result</h3>
-			<button id="button-wikicompare" class="btn" style="display:none;margin-right:.5em">Open in WikiCompare</button>
-			<button id="button-copyquickstatements" class="btn" style="margin-right:.5em" disabled>Copy &amp; open QuickStatements</button>
-			<button id="button-copy" class="btn btn-default" disabled>Copy</button>
+			<div class="btn-group" role="group">
+				<button id="button-result-tools" type="button" class="btn dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" disabled>External tools</button>
+				<div class="dropdown-menu" aria-labelledby="button-result-tools">
+					<button id="button-copyquickstatements" class="dropdown-item" type="button" disabled>Copy &amp; open QuickStatements</button>
+					<a id="button-wikicompare" class="dropdown-item" href="#" style="display:none" >Open in WikiCompare</a>
+				</div>
+			</div>		
+			<button id="button-copy" class="btn btn-default btn-secondary" disabled>Copy</button>
 		</div>
 		<div class="row">
 			<textarea id="output" class="form-control" readonly rows="5"></textarea>
@@ -96,7 +102,16 @@
 			<textarea id="output-failed" class="form-control" readonly rows="1"></textarea>
 		</div>
 	</div>
-</div>
+</main>
+<footer class="footer">
+	<div class="container text-right">
+		<span class="text-muted">
+			Tool made by <a href="https://nw520.de/" target="_blank" rel="nofollow noopener">nw520</a> <small>(<a href="https://www.wikidata.org/wiki/User:Nw520" target="_blank" rel="nofollow noopener">@ Wikidata</a>)</small>.<br/>
+			Thanks to <a href="https://www.wikidata.org/wiki/User:Tagishsimon" target="_blank" rel="nofollow noopener">Tagishsimon</a> for providing me with a <a href="https://www.wikidata.org/wiki/Wikidata:Request_a_query/Archive/2018/05#Check_whether_a_given_list_of_element_IDs_fullfills_certain_criteria_and_return_list_of_matching_items" target="_blank" rel="nofollow noopener">SPARQL query</a>.<br/>
+			<a href="https://github.com/nw520/WikiRsolve" target="_blank" rel="nofollow noopener">Source code @ GitHub</a> &bull; <a href="https://github.com/nw520/WikiRsolve/issues" target="_blank" rel="nofollow noopener">Report bugs @ GitHub</a>
+		</span>
+	</div>
+</footer>
 
 <div class="modal fade" id="modal-settings" tabindex="-1" role="dialog" aria-labelledby="modal-settings-label" aria-hidden="true">
 	<div class="modal-dialog" role="document">
@@ -207,10 +222,6 @@
 				<ul>
 					<li><code>wdt:P31/wdt:P279*~</code>, instance of/subclass of*</li>
 				</ul>
-
-				<h3>About</h3>
-				<p>WikiRsolve is made by <a href="https://www.wikidata.org/wiki/User:Nw520" target="_blank" rel="nofollow noopener">nw520</a> <small><a href="https://nw520.de/" target="_blank" rel="nofollow noopener">(Homepage)</a></small>.<br/>
-					Thanks to <a href="https://www.wikidata.org/wiki/User:Tagishsimon" target="_blank" rel="nofollow noopener">Tagishsimon</a> for providing me with a <a href="https://www.wikidata.org/wiki/Wikidata:Request_a_query/Archive/2018/05#Check_whether_a_given_list_of_element_IDs_fullfills_certain_criteria_and_return_list_of_matching_items" target="_blank" rel="nofollow noopener">SPARQL query</a>.</p>
 			</div>
 			<div class="modal-footer">
 				<button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
@@ -219,8 +230,11 @@
 	</div>
 </div>
 <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js" integrity="sha384-uefMccjFJAIv6A+rW+L4AHf99KvxDjWSu1z9VI8SKNVmz4sk7buKt/6v9KI65qnm" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
 <script src="data/components/tooltipster/4.0/js/tooltipster.bundle.min.js"></script>
+<script src="data/js/utils.js"></script>
+<script src="data/js/requestQueue.js"></script>
 <script src="data/js/script.js"></script>
 </body>
 </html>
