@@ -16,49 +16,46 @@ textarea {
 .modal-dialog {
 	max-width: 85%;
 }
-.status::after {
+/* <common> */
+.status {
 	border: 1px solid;
 	border-radius: 5px;
 	margin: 0 .5em;
 	padding: 0 .75em;
 	text-transform: uppercase;
+	white-space: nowrap;
 }
-.status-disambiguation::after {
-	color: #856404;
-	background-color: #fff3cd;
-	border-color: #ffeeba;
-	content: 'Disamb.';
+.status-disambiguation .status {
+	color: #0D47A1;
+	background-color: #E3F2FD;
+	border-color: #0D47A1;
 }
-.status-failed::after {
-	color: #721c24;
-	background-color: #f8d7da;
-	border-color: #f5c6cb;
-	content: 'Failed';
+.status-error .status {
+	color: #B71C1C;
+	background-color: #FFEBEE;
+	border-color: #B71C1C;
 }
-.status-noresults::after {
-	color: #856404;
-	background-color: #fff3cd;
-	border-color: #ffeeba;
-	content: 'No Results';
+.status-no-results .status {
+	color: #FF6F00;
+	background-color: #FFF8E1;
+	border-color: #FF6F00;
 }
-.status-pending::after {
-	background-color: #e2e3e5;
-	border-color: #d6d8db;
-	color: #383d41;
-	content: 'Pending';
+.status-pending .status {
+	color: #212121;
+	background-color: #FAFAFA;
+	border-color: #212121;
 }
-.status-progress::after {
-	color: #0c5460;
-	background-color: #d1ecf1;
-	border-color: #bee5eb;
-	content: '...';
+.status-success .status {
+	color: #1B5E20;
+	background-color: #E8F5E9;
+	border-color: #1B5E20;
 }
-.status-success::after {
-	color: #155724;
-	background-color: #d4edda;
-	border-color: #c3e6cb;
-	content: 'Success';
+.status-working .status {
+	color: #006064;
+	background-color: #E0F7FA;
+	border-color: #006064;
 }
+/* </common> */
 html.stickyfooter {
 	height: 100%;
 }
@@ -71,17 +68,30 @@ html.stickyfooter {
 	flex: 1;
 }
 .tooltipster-sidetip.tooltipster-error.tooltipster-left .tooltipster-arrow-background {
-	border-left-color: #f8d7da !important;
+	border-left-color: #FFEBEE !important;
 }
-.tooltipster-sidetip.tooltipster-light.tooltipster-left .tooltipster-arrow-border {
-	border-left-color: #f5c6cb !important;
+.tooltipster-sidetip.tooltipster-error.tooltipster-left .tooltipster-arrow-border {
+	border-left-color: #B71C1C !important;
 }
 .tooltipster-sidetip.tooltipster-error .tooltipster-box {
-	background-color: #f8d7da !important;
-	border-color: #f5c6cb !important;
+	background-color: #FFEBEE !important;
+	border-color: #B71C1C !important;
 }
 .tooltipster-sidetip.tooltipster-error .tooltipster-content {
-	color: #721c24 !important;
+	color: #B71C1C !important;
+}
+.tooltipster-sidetip.tooltipster-success.tooltipster-left .tooltipster-arrow-background {
+	border-left-color: #E8F5E9 !important;
+}
+.tooltipster-sidetip.tooltipster-success.tooltipster-left .tooltipster-arrow-border {
+	border-left-color: #1B5E20 !important;
+}
+.tooltipster-sidetip.tooltipster-success .tooltipster-box {
+	background-color: #E8F5E9 !important;
+	border-color: #1B5E20 !important;
+}
+.tooltipster-sidetip.tooltipster-success .tooltipster-content {
+	color: #1B5E20 !important;
 }
 #table-output span.mode-selected {
 	font-style: italic;

@@ -9,6 +9,7 @@
 <link rel="stylesheet" href="data/css/style.css" />
 <link rel="stylesheet" href="data/components/tooltipster/4.0/css/tooltipster.bundle.min.css" />
 <link rel="stylesheet" href="data/components/tooltipster/4.0/css/plugins/tooltipster/sideTip/themes/tooltipster-sideTip-light.min.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.10/dist/css/bootstrap-select.min.css">
 </head>
 
 <body>
@@ -22,12 +23,12 @@
 			<li class="nav-item dropdown">
 				<a class="nav-link dropdown-toggle" href="#" id="navitem-tools" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">More Wikidata tools</a>
 				<div class="dropdown-menu" aria-labelledby="navitem-tools">
-					<a class="dropdown-item" href="https://nw520.github.io/WikiCompare/" rel="nofollow noopener">WikiCompare</a>
-					<a class="dropdown-item" href="https://nw520.github.io/WikiOSMerged/" rel="nofollow noopener">WikiOSMerged</a>
+					<a class="dropdown-item" href="https://nw520.github.io/WikiCompare/" rel="noopener">WikiCompare</a>
+					<a class="dropdown-item" href="https://nw520.github.io/WikiOSMerged/" rel="noopener">WikiOSMerged</a>
 				</div>
 			</li>
 			<li class="nav-item">
-				<a class="nav-link" href="https://tools.wmflabs.org/quickstatements/#/batch" rel="nofollow noopener">QuickStatements</a>
+				<a class="nav-link" href="https://tools.wmflabs.org/quickstatements/#/batch" rel="noopener">QuickStatements</a>
 			</li>
 			<li class="nav-item">
 				<a class="nav-link" href="#" data-toggle="modal" data-target="#modal-settings">Settings</a>
@@ -50,11 +51,23 @@
 			<div style="align-items:center;display:flex;margin-left:2em">
 				<p style="margin:0">No idea what to to? Click <a href="#" data-toggle="modal" data-target="#modal-help">here</a> to read the help.</p>
 			</div>
+			<div style="flex:1;text-align:right">
+				<a id="button-settings" class="btn btn-secondary" href="#" title="Open settings" data-toggle="modal" data-target="#modal-settings">⚙️</a>
+			</div>
 		</div>
 	</div>
 	<div id="rowTable" style="margin-top:1.5em">
 		<div class="row">
 			<h3>Data</h3>
+			<div style="flex:1;text-align:right">
+				<select id="statusfilter" class="selectpicker" multiple title="Filter results by status">
+					<option value="pending" selected>Pending</option>
+					<option value="disambiguation" selected>Disambiguation</option>
+					<option value="no results" selected>No results</option>
+					<option value="success" selected>Success</option>
+					<option value="failed" selected>Failed</option>
+				  </select>
+			</div>
 		</div>
 		<div class="row">
 			<table id="table-output" class="table table-striped" role="grid">
@@ -79,7 +92,7 @@
 		</div>
 	</div>
 	<div id="rowTable" style="margin-top:1.5em">
-		<div class="row d-flex">
+		<div class="row">
 			<h3 style="flex:1">Result</h3>
 			<div class="btn-group" role="group">
 				<button id="button-result-tools" type="button" class="btn dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" disabled>External tools</button>
@@ -87,8 +100,8 @@
 					<button id="button-copyquickstatements" class="dropdown-item" type="button" disabled>Copy &amp; open QuickStatements</button>
 					<a id="button-wikicompare" class="dropdown-item" href="#" style="display:none" >Open in WikiCompare</a>
 				</div>
-			</div>		
-			<button id="button-copy" class="btn btn-default btn-secondary" disabled>Copy</button>
+				<button id="button-copy" class="btn btn-default btn-secondary" disabled>Copy</button>
+			</div>
 		</div>
 		<div class="row">
 			<textarea id="output" class="form-control" readonly rows="5"></textarea>
@@ -106,9 +119,9 @@
 <footer class="footer">
 	<div class="container text-right">
 		<span class="text-muted">
-			Tool made by <a href="https://nw520.de/" target="_blank" rel="nofollow noopener">nw520</a> <small>(<a href="https://www.wikidata.org/wiki/User:Nw520" target="_blank" rel="nofollow noopener">@ Wikidata</a>)</small>.<br/>
-			Thanks to <a href="https://www.wikidata.org/wiki/User:Tagishsimon" target="_blank" rel="nofollow noopener">Tagishsimon</a> for providing me with a <a href="https://www.wikidata.org/wiki/Wikidata:Request_a_query/Archive/2018/05#Check_whether_a_given_list_of_element_IDs_fullfills_certain_criteria_and_return_list_of_matching_items" target="_blank" rel="nofollow noopener">SPARQL query</a>.<br/>
-			<a href="https://github.com/nw520/WikiRsolve" target="_blank" rel="nofollow noopener">Source code @ GitHub</a> &bull; <a href="https://github.com/nw520/WikiRsolve/issues" target="_blank" rel="nofollow noopener">Report bugs @ GitHub</a>
+			Tool made by <a href="https://nw520.de/" target="_blank" rel="noopener">nw520</a> <small>(<a href="https://www.wikidata.org/wiki/User:Nw520" target="_blank" rel="noopener">@ Wikidata</a>)</small>.<br/>
+			Thanks to <a href="https://www.wikidata.org/wiki/User:Tagishsimon" target="_blank" rel="noopener">Tagishsimon</a> for providing me with a <a href="https://www.wikidata.org/wiki/Wikidata:Request_a_query/Archive/2018/05#Check_whether_a_given_list_of_element_IDs_fullfills_certain_criteria_and_return_list_of_matching_items" target="_blank" rel="noopener">SPARQL query</a>.<br/>
+			<a href="https://github.com/nw520/WikiRsolve" target="_blank" rel="noopener">Source code @ GitHub</a> &bull; <a href="https://github.com/nw520/WikiRsolve/issues" target="_blank" rel="noopener">Report bugs @ GitHub</a>
 		</span>
 	</div>
 </footer>
@@ -152,18 +165,21 @@
 							</td>
 						</tr>
 						<tr>
-							<th scope="row">Show result removal button</th>
+							<th scope="row">Only resolve first column and ignore the other ones</th>
 							<td>
-								<input id="setting-candidateremoval" class="form-control" type="checkbox" checked />
+								<input id="setting-resolveonlyfirst" class="form-control" type="checkbox" checked />
 							</td>
 						</tr>
-						<datalist id="languages"></datalist>
 					</tbody>
 				</table>
+				<datalist id="languages"></datalist>
 			</div>
 			<div class="modal-footer">
-				<button id="button-settings-geturl" type="button" class="btn btn-secondary">Get URL</button>
-				<button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+				<div class="btn-group" role="group">
+					<button id="button-settings-save" type="button" class="btn btn-primary">Save</button>
+					<button id="button-settings-geturl" type="button" class="btn btn-secondary">Get URL</button>
+					<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -182,7 +198,7 @@
 				<p><b>WikiR<span style="color:#bbb">e</span>solve</b> is a tool for automatically resolving the item ids of a given list of search queries.</p>
 				
 				<h3>Syntax</h3>
-				<p>The syntax of WikiRsolve is based on the one of <a href="https://tools.wmflabs.org/quickstatements/" target="_blank" rel="nofollow noopener">QuickStatements v1</a> and, if successfull, will be processed to valid QuickStatements v1 statements.</p>
+				<p>The syntax of WikiRsolve is based on the one of <a href="https://tools.wmflabs.org/quickstatements/" target="_blank" rel="noopener">QuickStatements v1</a> and, if successfull, will be processed to valid QuickStatements v1 statements.</p>
 				<p>A simple query could for example look like:<br/>
 					<code>Wikidata||P31=Q14827288<span class="highlight-tab"></span>operator|P|P1629=Q29933786<span class="highlight-tab"></span>Wikimedia Foundation|Q<span class="highlight-tab"></span>$P275<span class="highlight-tab"></span>$Q6938433</code></p>
 				
@@ -212,7 +228,7 @@
 					<i>Example:</i> <code>Treptow-Köpenick||P131*=Q183</code></p>
 
 				<h5>Wiki article name <code>^</code></h5>
-				<p>This condition can be used to extract the associated Wikidata ID from a given wiki article. A list of all wiki abbreviations can be found <a href="https://www.wikidata.org/w/api.php?action=help&modules=wbgetentities" target="_blank" rel="nofollow noopener">here</a> next to "Sites".<br/>
+				<p>This condition can be used to extract the associated Wikidata ID from a given wiki article. A list of all wiki abbreviations can be found <a href="https://www.wikidata.org/w/api.php?action=help&modules=wbgetentities" target="_blank" rel="noopener">here</a> next to "Sites".<br/>
 					<i>Example:</i> <code>Platooning||^enwiki</code></p>
 
 				<h5>SPARQL conditions <code>~</code></h5>
@@ -236,5 +252,6 @@
 <script src="data/js/utils.js"></script>
 <script src="data/js/requestQueue.js"></script>
 <script src="data/js/script.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.10/dist/js/bootstrap-select.min.js"></script>
 </body>
 </html>

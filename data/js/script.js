@@ -139,35 +139,46 @@ class Settings {
 		if($(`style[data-setting='${name}']`).length == 0) $("head").append(`<style data-setting="${name}">${style}</style>`);
 	}
 	static export() {
-		if($("#button-settings-geturl").hasClass("mode-ready")) {
-			var settings = {
-				"candidateremoval": $("#setting-candidateremoval").is(":checked"),
-				"disambiguation-candidatesnumber": $("#setting-disambiguation-candidatesnumber").val(),
-				"disambiguation-matchhighlight": $("#setting-disambiguation-matchhighlight").is(":checked"),
-				"language-item": $("#setting-language-item").val(),
-				"language-search": $("#setting-language-search").val()
-			};
-			window.location.search = `?settings=${encodeURIComponent(JSON.stringify(settings))}`;
-		} else {
-			$("#button-settings-geturl").tooltipster({
-				content: "Clicking again on this button will redirect you to a new url which has your settings stored. This url can be bookmarked. However, your current entries in the input textbox will be gone once redirected.",
-				functionAfter: function() {
-					$("#button-settings-geturl").removeClass("mode-ready");
-				},
-				functionBefore: function() {
-					$("#button-settings-geturl").addClass("mode-ready");
-				},
-				side: "left",
-				theme: ["tooltipster-light", "tooltipster-error"],
-				timer: 10000,
-				trigger: "custom"
-			}).tooltipster("open");
-		}
+		var settings = {
+			"candidateremoval": $("#setting-candidateremoval").is(":checked"),
+			"disambiguation-candidatesnumber": $("#setting-disambiguation-candidatesnumber").val(),
+			"disambiguation-matchhighlight": $("#setting-disambiguation-matchhighlight").is(":checked"),
+			"language-item": $("#setting-language-item").val(),
+			"language-search": $("#setting-language-search").val()
+		};
+		return settings;
 	}
 	static initialize() {
 		$("#button-settings-geturl").click(function(e) {
 			e.preventDefault();
-			Settings.export();
+			if($("#button-settings-geturl").hasClass("mode-ready")) {
+				window.location.search = `?settings=${encodeURIComponent(JSON.stringify(Settings.export()))}`;
+			} else {
+				$("#button-settings-geturl").tooltipster({
+					content: "Clicking again on this button will redirect you to a new url which has your settings stored. This url can be bookmarked. However, your current entries in the input textbox will be gone once redirected.",
+					functionAfter: function() {
+						$("#button-settings-geturl").removeClass("mode-ready");
+					},
+					functionBefore: function() {
+						$("#button-settings-geturl").addClass("mode-ready");
+					},
+					side: "left",
+					theme: ["tooltipster-light", "tooltipster-error"],
+					timer: 10000,
+					trigger: "custom"
+				}).tooltipster("open");
+			}
+		});
+		$("#button-settings-save").click(function(e) {
+			e.preventDefault();
+			localStorage.setItem('wikiRsolve.settings', JSON.stringify(Settings.export()));
+			$("#button-settings-save").tooltipster({
+				content: "Saved!",
+				side: "left",
+				theme: ["tooltipster-light", "tooltipster-success"],
+				timer: 10000,
+				trigger: "custom"
+			}).tooltipster("open");
 		});
 
 		Settings.loadLanguages();
@@ -175,21 +186,33 @@ class Settings {
 		Settings.attachLiveHandler();
 	}
 	static load() {
-		var query = (new URL(window.location.href)).searchParams.get("settings");
-		if(query != null) {
+		var localstorageSettings = localStorage.getItem("wikiRsolve.settings");
+		if(localstorageSettings != null) {
 			try {
-				var settings = JSON.parse(query);
-
-				if(typeof settings["candidateremoval"] != "undefined") $("#setting-candidateremoval").prop("checked", settings["candidateremoval"]);
-
-				if(typeof settings["disambiguation-candidatesnumber"] != "undefined") $("#setting-disambiguation-candidatesnumber").val(settings["disambiguation-candidatesnumber"]);
-				if(typeof settings["disambiguation-matchhighlight"] != "undefined") $("#setting-disambiguation-matchhighlight").prop("checked", settings["disambiguation-matchhighlight"]);
-
-				if(typeof settings["language-item"] != "undefined") $("#setting-language-item").val(settings["language-item"]);
-				if(typeof settings["language-search"] != "undefined") $("#setting-language-search").val(settings["language-search"]);
+				apply(JSON.parse(localstorageSettings));
 			} catch(ex) {
 				console.warn(ex);
 			}
+		}
+
+		var query = (new URL(window.location.href)).searchParams.get("settings");
+		if(query != null) {
+			try {
+				apply(JSON.parse(query));
+			} catch(ex) {
+				console.warn(ex);
+			}
+		}
+
+		function apply(settings) {
+			assign(settings, "candidateremoval", x => $("#setting-candidateremoval").prop("checked", x));
+			assign(settings, "disambiguation-candidatesnumber", x => $("#setting-disambiguation-candidatesnumber").val(x));
+			assign(settings, "disambiguation-matchhighlight", x => $("#setting-disambiguation-matchhighlight").prop("checked", x));
+			assign(settings, "language-item", x => $("#setting-language-item").val(x));
+			assign(settings, "language-search", x => $("#setting-language-search").val(x));
+		}
+		function assign(settings, key, assignFunction) {
+			if(typeof settings[key] != "undefined") assignFunction(settings[key]);
 		}
 	}
 	static loadLanguages() {	// https://www.wikidata.org/w/api.php?action=help&modules=wbsearchentities
@@ -261,11 +284,11 @@ class UiRow {
 		}
 	}
 	generateRow() {
-		return `<tr data-rowindex="${this.rowIndex}" data-tupleindex="${this.tupleIndex}">${this.generateInnerRow()}</tr>`;
+		return `<tr class="status-${this.status.replace(/ /g, "-")}" data-rowindex="${this.rowIndex}" data-tupleindex="${this.tupleIndex}">${this.generateInnerRow()}</tr>`;
 	}
 	generateInnerRow() {
 		return `<th scope="row">${this.rowIndex + 1}</th>
-			<td><span class="status status-${this.status}"></span></td>
+			<td><span class="status">${this.status}</span></td>
 			<td>${_e(this.tuple.searchquery)}</td>
 			<td>${this.tuple.result != null ? `<a href="https://www.wikidata.org/wiki/${this.tuple.result}" target="_blank">${this.tuple.result}</a><small class="tool-candidateremoval">&nbsp;[<a href="#" data-action="remove-candidate">&times;</a>]</small>` : ""}</td>
 			<td>${this.disambiguation || ""}</td>`;
@@ -275,6 +298,10 @@ class UiRow {
 	}
 	update() {
 		this.getRow().html(this.generateInnerRow());
+		this.getRow().removeClass(function(i, className) {
+			return (className.match (/(^|\s)status-\S+/g) || []).join(' ');
+		});
+		this.getRow().addClass(`status-${this.status.replace(/ /g, "-")}`);
 		attachRemoveListener(this);
 		if(this.disambiguation != null) attachDisambiguationListener(this);
 
@@ -322,8 +349,27 @@ jQuery(document).ready(function($) {
 		e.preventDefault();
 		request();
 	});
+	$("#statusfilter").on("changed.bs.select", function(e, clickedIndex, isSelected, previousValue) {
+		e.preventDefault();
+		updateFilter();
+	})
 
 	Settings.initialize();
+	updateFilter();
+
+	function updateFilter() {
+		var selected = $("#statusfilter").val();
+		$("#statusfilter option").each(function(i, val) {
+			var statusLabel = $(this).attr("value");
+			if(selected.includes(statusLabel)) {
+				Settings.disableConditionalStyle(`statusfilter-${statusLabel}`);
+			} else {
+				Settings.enableConditionalStyle(`statusfilter-${statusLabel}`, `.status-${statusLabel.replace(/ /g, "-")} {
+					display: none;
+				}`);
+			}
+		});
+	}
 });
 
 function extendData(oldItem, newItem) {

@@ -30,7 +30,7 @@ class RequestQueue {
 	_performRequest(tuple, rowIndex, tupleIndex) {
 		var this_rq = this;
 		this.performing += 1;
-		tuple.ui.status = "progress";
+		tuple.ui.status = "working";
 		tuple.ui.update();
 
 		if(tuple.conditions.length == 1 && tuple.conditions[0].mode == "^") {
@@ -52,7 +52,7 @@ class RequestQueue {
 				}).done(function(e) {
 					console.debug(e);
 					if(Object.keys(e.query.pages)[0] == "-1") {
-						tuple.ui.status = "noresults";
+						tuple.ui.status = "no results";
 						tuple.ui.update();
 					} else {
 						tuple.ui.status = "success";
@@ -99,7 +99,7 @@ class RequestQueue {
 				this_rq._finishRequest();
 			}).done(function(e) {
 				if(e.search.length == 0) {
-					tuple.ui.status = "noresults";
+					tuple.ui.status = "no results";
 					tuple.ui.update();
 				} else {
 					Condition.filterItems(tuple, e.search, finalize);
