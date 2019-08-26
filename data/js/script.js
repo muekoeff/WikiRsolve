@@ -1,331 +1,5 @@
-class Condition {
-	constructor(mode, property, value) {
-		this.mode = mode;
-		this.property = property;
-		this.value = value;
-	}
-
-	static filterItem(tuple, elements, results, callback) {
-		var elementsNew = elements.slice(0);
-
-		$.ajax({
-			beforeSend: function(request) {
-				request.setRequestHeader("Accept", "application/json, text/plain, */*");
-			},
-			data: {
-				"query": `SELECT ?item ?itemLabel WHERE { VALUES ?item {${resultsToIdList(results).join(" ")}} ${generateConditions(tuple).join("")} SERVICE wikibase:label { bd:serviceParam wikibase:language "${$("#setting-language-item").val().toLowerCase()},en". } }`
-			},
-			type: "GET",
-			url: "https://query.wikidata.org/sparql"
-		}).done(function(e) {
-			var sparqlMatches = sparqlResultToIdList(e);
-			$.each(elements, function(index, candidate) {
-				if(sparqlMatches.indexOf(candidate.id) > -1) {
-					extendData(elementsNew[index], results.entities[candidate.id]);
-				} else {
-					elementsNew[index] = null;
-				}
-			});
-			callback(elementsNew.filter(function(n) {	// Filter out 'null'
-				return n != null;
-			}));
-		}).fail(function(e) {
-			console.error(e);
-			callback(elements);	// Don't filter
-		});
-
-		function generateConditions(tuple) {
-			var rules = [];
-			$.each(tuple.conditions, function(a, b) {
-				switch(b.mode) {
-					case "=":
-						rules.push(`?item wdt:${b.property} wd:${b.value} .`);
-						break;
-					case "~":
-						rules.push(`?item ${b.property} ${b.value} .`);
-						break;
-				}
-			});
-			return rules;
-		}
-		function sparqlResultToIdList(results) {
-			var idList = [];
-			$.each(results.results.bindings, function(a, b) {
-				idList.push(b.item.value.replace("http://www.wikidata.org/entity/", ""));
-			});
-			return idList;
-		}
-		function resultsToIdList(results) {
-			var idList = [];
-			$.each(results.entities, function(index, candidate) {
-				idList.push(`wd:${candidate.id}`);
-			});
-			return idList;
-		}
-	}
-	static filterItems(tuple, elements, callback) {
-		var ids = [];
-		$.each(elements, function(index, item) {
-			ids.push(item.id);
-		});
-
-		$.ajax({
-			data: {
-				"action": "wbgetentities",
-				"format": "json",
-				"languages": `${$("#setting-language-item").val().toLowerCase()}|en`,
-				"origin": "*",
-				"ids": ids.join("|")
-			},
-			url: "https://www.wikidata.org/w/api.php"
-		}).done(function(e) {
-			if(tuple.conditions.length > 0) {
-				Condition.filterItem(tuple, elements, e, callback);
-			} else {
-				callback(elements);
-			}
-		}).fail(function(e) {
-			console.error(e);
-			callback(elements);
-		});
-	}
-	static parse(conditions) {
-		var rules = [];
-		if(conditions.startsWith("^")) {
-			rules.push(new Condition("^", "", conditions.substr(1)));
-		} else {
-			$.each(conditions.split(","), function(ruleIndex, ruleTerm) {
-				if(ruleTerm.split("=").length == 2) {
-					var pair = ruleTerm.split("=");
-					rules.push(new Condition("=", pair[0], pair[1]));
-				} else if(ruleTerm.split("~").length == 2) {
-					var pair = ruleTerm.split("~");
-					rules.push(new Condition("~", pair[0], pair[1]));
-				}
-			});
-		}
-		return rules;
-	}
-}
-class Settings {
-	static attachLiveHandler() {
-		$("#setting-candidateremoval").change(function(e) {
-			if(this.checked) {
-				Settings.disableConditionalStyle("candidateremoval");
-			} else {
-				Settings.enableConditionalStyle("candidateremoval", `.tool-candidateremoval {
-					display: none;
-				}`);
-			}
-		});
-		$("#setting-disambiguation-matchhighlight").change(function(e) {
-			if(this.checked) {
-				Settings.enableConditionalStyle("disambiguation-matchhighlight", `.tool-matchhighlight {
-					background-color: rgba(255,255,0,.8);
-				}`);
-			} else {
-				Settings.disableConditionalStyle("disambiguation-matchhighlight");
-			}
-		});
-
-		$("#setting-candidateremoval").change();
-		$("#setting-disambiguation-matchhighlight").change();
-	}
-	static disableConditionalStyle(name) {
-		var element = $(`style[data-setting='${name}']`);
-		if(element.length != 0) element.remove();
-	}
-	static enableConditionalStyle(name, style) {
-		if($(`style[data-setting='${name}']`).length == 0) $("head").append(`<style data-setting="${name}">${style}</style>`);
-	}
-	static export() {
-		var settings = {
-			"candidateremoval": $("#setting-candidateremoval").is(":checked"),
-			"disambiguation-candidatesnumber": $("#setting-disambiguation-candidatesnumber").val(),
-			"disambiguation-matchhighlight": $("#setting-disambiguation-matchhighlight").is(":checked"),
-			"language-item": $("#setting-language-item").val(),
-			"language-search": $("#setting-language-search").val()
-		};
-		return settings;
-	}
-	static initialize() {
-		$("#button-settings-geturl").click(function(e) {
-			e.preventDefault();
-			if($("#button-settings-geturl").hasClass("mode-ready")) {
-				window.location.search = `?settings=${encodeURIComponent(JSON.stringify(Settings.export()))}`;
-			} else {
-				$("#button-settings-geturl").tooltipster({
-					content: "Clicking again on this button will redirect you to a new url which has your settings stored. This url can be bookmarked. However, your current entries in the input textbox will be gone once redirected.",
-					functionAfter: function() {
-						$("#button-settings-geturl").removeClass("mode-ready");
-					},
-					functionBefore: function() {
-						$("#button-settings-geturl").addClass("mode-ready");
-					},
-					side: "left",
-					theme: ["tooltipster-light", "tooltipster-error"],
-					timer: 10000,
-					trigger: "custom"
-				}).tooltipster("open");
-			}
-		});
-		$("#button-settings-save").click(function(e) {
-			e.preventDefault();
-			localStorage.setItem('wikiRsolve.settings', JSON.stringify(Settings.export()));
-			$("#button-settings-save").tooltipster({
-				content: "Saved!",
-				side: "left",
-				theme: ["tooltipster-light", "tooltipster-success"],
-				timer: 10000,
-				trigger: "custom"
-			}).tooltipster("open");
-		});
-
-		Settings.loadLanguages();
-		Settings.load();
-		Settings.attachLiveHandler();
-	}
-	static load() {
-		var localstorageSettings = localStorage.getItem("wikiRsolve.settings");
-		if(localstorageSettings != null) {
-			try {
-				apply(JSON.parse(localstorageSettings));
-			} catch(ex) {
-				console.warn(ex);
-			}
-		}
-
-		var query = (new URL(window.location.href)).searchParams.get("settings");
-		if(query != null) {
-			try {
-				apply(JSON.parse(query));
-			} catch(ex) {
-				console.warn(ex);
-			}
-		}
-
-		function apply(settings) {
-			assign(settings, "candidateremoval", x => $("#setting-candidateremoval").prop("checked", x));
-			assign(settings, "disambiguation-candidatesnumber", x => $("#setting-disambiguation-candidatesnumber").val(x));
-			assign(settings, "disambiguation-matchhighlight", x => $("#setting-disambiguation-matchhighlight").prop("checked", x));
-			assign(settings, "language-item", x => $("#setting-language-item").val(x));
-			assign(settings, "language-search", x => $("#setting-language-search").val(x));
-		}
-		function assign(settings, key, assignFunction) {
-			if(typeof settings[key] != "undefined") assignFunction(settings[key]);
-		}
-	}
-	static loadLanguages() {	// https://www.wikidata.org/w/api.php?action=help&modules=wbsearchentities
-		var lang = ["aa","ab","ace","ady","ady-cyrl","aeb","aeb-arab","aeb-latn","af","ak","aln","als","am","an","ang","anp","ar","arc","arn","arq","ary","arz","as","ase","ast","atj","av","avk","awa","ay","az","azb","ba","ban","bar","bat-smg","bbc","bbc-latn","bcc","bcl","be","be-tarask","be-x-old","bg","bgn","bh","bho","bi","bjn","bm","bn","bo","bpy","bqi","br","brh","bs","bto","bug","bxr","ca","cbk-zam","cdo","ce","ceb","ch","cho","chr","chy","ckb","co","cps","cr","crh","crh-cyrl","crh-latn","cs","csb","cu","cv","cy","da","de","de-at","de-ch","de-formal","din","diq","dsb","dtp","dty","dv","dz","ee","egl","el","eml","en","en-ca","en-gb","eo","es","es-formal","et","eu","ext","fa","ff","fi","fit","fiu-vro","fj","fo","fr","frc","frp","frr","fur","fy","ga","gag","gan","gan-hans","gan-hant","gcr","gd","gl","glk","gn","gom","gom-deva","gom-latn","gor","got","grc","gsw","gu","gv","ha","hak","haw","he","hi","hif","hif-latn","hil","ho","hr","hrx","hsb","ht","hu","hu-formal","hy","hz","ia","id","ie","ig","ii","ik","ike-cans","ike-latn","ilo","inh","io","is","it","iu","ja","jam","jbo","jut","jv","ka","kaa","kab","kbd","kbd-cyrl","kbp","kea","kg","khw","ki","kiu","kj","kk","kk-arab","kk-cn","kk-cyrl","kk-kz","kk-latn","kk-tr","kl","km","kn","ko","ko-kp","koi","kr","krc","kri","krj","krl","ks","ks-arab","ks-deva","ksh","ku","ku-arab","ku-latn","kum","kv","kw","ky","la","lad","lb","lbe","lez","lfn","lg","li","lij","liv","lki","lmo","ln","lo","loz","lrc","lt","ltg","lus","luz","lv","lzh","lzz","mai","map-bms","mdf","mg","mh","mhr","mi","min","mk","ml","mn","mo","mr","mrj","ms","mt","mus","mwl","my","myv","mzn","na","nah","nan","nap","nb","nds","nds-nl","ne","new","ng","niu","nl","nl-informal","nn","no","nod","nov","nrm","nso","nv","ny","nys","oc","olo","om","or","os","ota","pa","pag","pam","pap","pcd","pdc","pdt","pfl","pi","pih","pl","pms","pnb","pnt","prg","ps","pt","pt-br","qu","qug","rgn","rif","rm","rmy","rn","ro","roa-rup","roa-tara","ru","rue","rup","ruq","ruq-cyrl","ruq-latn","rw","rwr","sa","sah","sat","sc","scn","sco","sd","sdc","sdh","se","sei","ses","sg","sgs","sh","shi","shi-latn","shi-tfng","shn","si","simple","sje","sk","skr","skr-arab","sl","sli","sm","sma","smj","sn","so","sq","sr","sr-ec","sr-el","srn","srq","ss","st","stq","sty","su","sv","sw","szl","ta","tay","tcy","te","tet","tg","tg-cyrl","tg-latn","th","ti","tk","tl","tly","tn","to","tpi","tr","tru","ts","tt","tt-cyrl","tt-latn","tum","tw","ty","tyv","tzm","udm","ug","ug-arab","ug-latn","uk","ur","uz","uz-cyrl","uz-latn","ve","vec","vep","vi","vls","vmf","vo","vot","vro","wa","war","wo","wuu","xal","xh","xmf","yi","yo","yue","za","zea","zh","zh-classical","zh-cn","zh-hans","zh-hant","zh-hk","zh-min-nan","zh-mo","zh-my","zh-sg","zh-tw","zh-yue","zu"];
-
-		$("#languages").html("");
-		$.each(lang, function(index, langcode) {
-			$("#languages").append(`<option value="${langcode}"></option>`);
-		})
-	}
-}
-class Tuple {
-	constructor(searchquery, type, conditions) {
-		this.searchquery = searchquery;
-		if(typeof type != "undefined" && type !== "") this.type = type; else this.type = "q";
-		if(typeof conditions != "undefined" && conditions !== "") this.conditions = conditions; else this.conditions = [];
-
-		this.result = null;
-	}
-
-	attachUi(ui) {
-		this.ui = ui;
-	}
-	validate() {
-		if(this.type.toLowerCase() != "p" && this.type.toLowerCase() != "q") return false;
-		return true;
-	}
-}
-class UiRow {
-	constructor(rowIndex, tupleIndex, tuple, status, disambiguation, disambiguationRaw) {
-		this.rowIndex = rowIndex;
-		this.tupleIndex = tupleIndex;
-		this.tuple = tuple;
-		if(typeof status != "undefined") this.status = status; else this.status = "pending";
-		if(typeof disambiguation != "undefined") this.disambiguation = disambiguation; else this.disambiguation = null;
-		if(typeof disambiguationRaw != "undefined") this.disambiguationRaw = disambiguationRaw; else this.disambiguationRaw = null;
-	}
-
-	clearResult() {
-		this.tuple.result = null;
-		this.status = "disambiguation";
-		this.generateDisambiguation();
-		this.update();
-	}
-	generateDisambiguation(result) {
-		var output = [];
-		var ui = this;
-
-		if(typeof result == "undefined" && this.disambiguationRaw != null) result = this.disambiguationRaw;
-		if(typeof result != "undefined") this.disambiguationRaw = result;
-
-		$.each(result, function(a, b) {
-			if(b != null) {
-				output.push(`<span class="${ui.tuple.result == b.id ? "mode-selected" : ""}" title="${b.description || "-"}"><a href="${b.concepturi}" data-item="${b.id}">${getHighlightedWord(b.label, ui.tuple.searchquery)}</a> <small>(${b.id}, ${b.description || "-"})</small> <small>[<a href="${b.concepturi}" target="_blank">Open</a>]</small></span>`);
-			}
-		});
-		this.tuple.ui.disambiguation = output.join("<br/>");
-
-		function getHighlightedWord(word, originalWord) {
-			var indexOf = word.toLowerCase().indexOf(originalWord.toLowerCase());
-			word = _e(word);
-			originalWord = _e(originalWord);
-			
-			if(indexOf >= 0) {
-				return `${word.substr(0, indexOf)}<span class="tool-matchhighlight">${word.substr(indexOf, originalWord.length)}</span>${word.substring(indexOf + originalWord.length)}`;
-			} else {
-				return word;
-			}
-		}
-	}
-	generateRow() {
-		return `<tr class="status-${this.status.replace(/ /g, "-")}" data-rowindex="${this.rowIndex}" data-tupleindex="${this.tupleIndex}">${this.generateInnerRow()}</tr>`;
-	}
-	generateInnerRow() {
-		return `<th scope="row">${this.rowIndex + 1}</th>
-			<td><span class="status">${this.status}</span></td>
-			<td>${_e(this.tuple.searchquery)}</td>
-			<td>${this.tuple.result != null ? `<a href="https://www.wikidata.org/wiki/${this.tuple.result}" target="_blank">${this.tuple.result}</a><small class="tool-candidateremoval">&nbsp;[<a href="#" data-action="remove-candidate">&times;</a>]</small>` : ""}</td>
-			<td>${this.disambiguation || ""}</td>`;
-	}
-	getRow() {
-		return $(`tr[data-rowindex='${this.rowIndex}'][data-tupleindex='${this.tupleIndex}']`);
-	}
-	update() {
-		this.getRow().html(this.generateInnerRow());
-		this.getRow().removeClass(function(i, className) {
-			return (className.match (/(^|\s)status-\S+/g) || []).join(' ');
-		});
-		this.getRow().addClass(`status-${this.status.replace(/ /g, "-")}`);
-		attachRemoveListener(this);
-		if(this.disambiguation != null) attachDisambiguationListener(this);
-
-		function attachDisambiguationListener(ui) {
-			$(ui.getRow().children("td")[3]).find("a[data-item]").each(function(a, b) {
-				$(b).click(function(e) {
-					e.preventDefault();
-					ui.tuple.result = $(this).attr("data-item");
-					ui.status = "success";
-					ui.generateDisambiguation();
-					ui.update();
-				});
-			});
-		}
-		function attachRemoveListener(ui) {
-			$(ui.getRow().find("a[data-action='remove-candidate']")).click(function(e) {
-				e.preventDefault();
-				ui.clearResult();
-			});
-		}
-	}
-}
 var elements;
-var requestQueue = new RequestQueue();
+var requestManager = new RequestManager();
 
 jQuery(document).ready(function($) {
 	$("#button-copy").click(function(e) {
@@ -356,7 +30,48 @@ jQuery(document).ready(function($) {
 
 	Settings.initialize();
 	updateFilter();
+	setupExample();
 
+	function setupExample() {
+		var samples = [
+			"Berlin|Q|P17=Q30\nBremen||P17=Q30\nHamburg||P17=Q30\nManheim||P17=Q30\nStuttgart||P17=Q30",
+			"Saransk|Q|^dewikivoyage\nSekretaj Sonetoj||^eowikisource\nSlavery||^commonswiki\nSphaleron||^dewiki\nSupernatural||^frwikiquote"
+		];
+		var sample = samples[Math.floor(Math.random()*samples.length)];
+		$("#commands").attr("placeholder", sample);
+		$("#button-copyexample").click(function(e) {
+			e.preventDefault();
+			if($(this).hasClass("tooltipstered")) $(this).tooltipster("destroy");
+			if($("#commands").val() == "") {
+				$("#commands").val(sample);
+				$(this).tooltipster({
+					content: `All ready! Now press that "Parse" button to the left and then "Request"`,
+					functionAfter: function() {
+						$("#button-copyexample").addClass("btn-light").removeClass("btn-success");
+					},
+					functionBefore: function() {
+						$("#button-copyexample").addClass("btn-success").removeClass("btn-danger btn-light");
+					},
+					theme: ["tooltipster-light", "tooltipster-success"],
+					timer: 10000,
+					trigger: "custom"
+				}).tooltipster("open");
+			} else {
+				$(this).tooltipster({
+					content: $(`<span>Please clear your entered commands first.<br/><small>Just to make sure you didn't accidentially press this button.</small></span>`),
+					functionAfter: function() {
+						$("#button-copyexample").addClass("btn-light").removeClass("btn-danger");
+					},
+					functionBefore: function() {
+						$("#button-copyexample").addClass("btn-danger").removeClass("btn-light");
+					},
+					theme: ["tooltipster-light", "tooltipster-error"],
+					timer: 10000,
+					trigger: "custom"
+				}).tooltipster("open");
+			}
+		});
+	}
 	function updateFilter() {
 		var selected = $("#statusfilter").val();
 		$("#statusfilter option").each(function(i, val) {
@@ -414,7 +129,6 @@ function generateOutput(elements) {
 	} else {
 		$("#button-wikicompare").hide();
 	}
-
 }
 function generateTable(elements) {
 	if(elements.length > 0) {
@@ -477,7 +191,7 @@ function parse() {
 function request() {
 	$.each(elements, function(rowIndex, row) {
 		$.each(row, function(tupleIndex, tuple) {
-			if(typeof tuple != "string") requestQueue.enqueueRequest(tuple, rowIndex, tupleIndex);
+			if(typeof tuple != "string") requestManager.enqueueRequest(tuple, rowIndex, tupleIndex);
 		});
 	});
 }

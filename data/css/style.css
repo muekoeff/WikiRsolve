@@ -73,12 +73,24 @@ html.stickyfooter {
 .tooltipster-sidetip.tooltipster-error.tooltipster-left .tooltipster-arrow-border {
 	border-left-color: #B71C1C !important;
 }
+.tooltipster-sidetip.tooltipster-error.tooltipster-top .tooltipster-arrow-background {
+	border-top-color: #FFEBEE !important;
+}
+.tooltipster-sidetip.tooltipster-error.tooltipster-top .tooltipster-arrow-border {
+	border-top-color: #B71C1C !important;
+}
 .tooltipster-sidetip.tooltipster-error .tooltipster-box {
 	background-color: #FFEBEE !important;
 	border-color: #B71C1C !important;
 }
 .tooltipster-sidetip.tooltipster-error .tooltipster-content {
 	color: #B71C1C !important;
+}
+.tooltipster-sidetip.tooltipster-success.tooltipster-top .tooltipster-arrow-background {
+	border-top-color: #E8F5E9 !important;
+}
+.tooltipster-sidetip.tooltipster-success.tooltipster-top .tooltipster-arrow-border {
+	border-top-color: #1B5E20 !important;
 }
 .tooltipster-sidetip.tooltipster-success.tooltipster-left .tooltipster-arrow-background {
 	border-left-color: #E8F5E9 !important;
