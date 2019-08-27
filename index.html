@@ -23,8 +23,8 @@
 			<li class="nav-item dropdown">
 				<a class="nav-link dropdown-toggle" href="#" id="navitem-tools" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">More Wikidata tools</a>
 				<div class="dropdown-menu" aria-labelledby="navitem-tools">
-					<a class="dropdown-item" href="https://nw520.github.io/WikiCompare/" rel="noopener">WikiCompare</a>
-					<a class="dropdown-item" href="https://nw520.github.io/WikiOSMerged/" rel="noopener">WikiOSMerged</a>
+					<a class="dropdown-item" href="https://muekoeff.github.io/Wikicompare/" rel="noopener">WikiCompare</a>
+					<a class="dropdown-item" href="https://muekoeff.github.io/wikiosmerged/" rel="noopener">WikiOSMerged</a>
 				</div>
 			</li>
 			<li class="nav-item">
@@ -122,7 +122,7 @@
 		<span class="text-muted">
 			Tool made by <a href="https://nw520.de/" target="_blank" rel="noopener">nw520</a> <small>(<a href="https://www.wikidata.org/wiki/User:Nw520" target="_blank" rel="noopener">@ Wikidata</a>)</small>.<br/>
 			Thanks to <a href="https://www.wikidata.org/wiki/User:Tagishsimon" target="_blank" rel="noopener">Tagishsimon</a> for providing me with a <a href="https://www.wikidata.org/wiki/Wikidata:Request_a_query/Archive/2018/05#Check_whether_a_given_list_of_element_IDs_fullfills_certain_criteria_and_return_list_of_matching_items" target="_blank" rel="noopener">SPARQL query</a>.<br/>
-			<a href="https://github.com/nw520/WikiRsolve" target="_blank" rel="noopener">Source code @ GitHub</a> &bull; <a href="https://github.com/nw520/WikiRsolve/issues" target="_blank" rel="noopener">Report bugs @ GitHub</a>
+			<a href="https://github.com/muekoeff/wikirsolve" target="_blank" rel="noopener">Source code @ GitHub</a> &bull; <a href="https://github.com/muekoeff/wikirsolve/issues" target="_blank" rel="noopener">Report bugs @ GitHub</a>
 		</span>
 	</div>
 </footer>
@@ -196,43 +196,133 @@
 			</div>
 			<div class="modal-body">
 				<h2>Help</h2>
-				<p><b>WikiR<span style="color:#bbb">e</span>solve</b> is a tool for automatically resolving the item ids of a given list of search queries.</p>
+				<p><b>WikiR<span style="color:#bbb">e</span>solve</b> is a tool for automatically resolving Wikidata entity ids of a given list of search queries.</p>
 				
 				<h3>Syntax</h3>
-				<p>The syntax of WikiRsolve is based on the one of <a href="https://tools.wmflabs.org/quickstatements/" target="_blank" rel="noopener">QuickStatements v1</a> and, if successfull, will be processed to valid QuickStatements v1 statements.</p>
-				<p>A simple query could for example look like:<br/>
-					<code>Wikidata||P31=Q14827288<span class="highlight-tab"></span>operator|P|P1629=Q29933786<span class="highlight-tab"></span>Wikimedia Foundation|Q<span class="highlight-tab"></span>$P275<span class="highlight-tab"></span>$Q6938433</code></p>
+				<p>The syntax of WikiRsolve is based on the one of <a href="https://tools.wmflabs.org/quickstatements/" target="_blank" rel="noopener">QuickStatements v1</a> and, if the operations succeed, will be processed to valid QuickStatements v1 statements.</p>
+				<p>A simple query which consists of only one <i><a href="#help_command_lines">command line</a></i> could for example look like this:<br/>
+					<code>Wikidata||P31=Q14827288<span class="highlight-tab"></span>operator|P|P1629=Q29933786<span class="highlight-tab"></span>Wikimedia Foundation|Q|^enwiki<span class="highlight-tab"></span>$P275<span class="highlight-tab"></span>$Q6938433</code>
+				</p>
+				<style>
+					#help_sampletable {
+						overflow-x: scroll;
+						white-space: nowrap;
+						text-align: center;
+					}
+					#help_sampletable * {
+						vertical-align: top;
+					}
+					.underline_row {
+						font-size: .9em;
+					}
+					.underline_row > td:not(:empty) {
+						border-top: solid thin var(--blue);
+					}
+				</style>
+				<div id="help_sampletable">
+					<table>
+						<tbody>
+							<tr>
+								<td><code>Wikidata</code></td>
+								<td><code>|</code></td>
+								<td></td>
+								<td><code>|</code></td>
+								<td><code>P31</code></td>
+								<td><code>=</code></td>
+								<td><code>Q14827288</code></td>
+								<td><code><span class="highlight-tab"></span></code></td>
+								<td><code>operator</code></td>
+								<td><code>|</code></td>
+								<td><code>P</code></td>
+								<td><code>|</code></td>
+								<td><code>P1629</code></td>
+								<td><code>=</code></td>
+								<td><code>Q29933786</code></td>
+								<td><code><span class="highlight-tab"></span></code></td>
+								<td><code>Wikimedia Foundation</code></td>
+								<td><code>|</code></td>
+								<td><code>Q</code></td>
+								<td><code>|</code></td>
+								<td><code>^enwiki</code></td>
+								<td><code><span class="highlight-tab"></span></code></td>
+								<td><code>$P275</code></td>
+								<td><code><span class="highlight-tab"></span></code></td>
+								<td><code>$Q6938433</code></td>
+							</tr>
+							<tr class="underline_row">
+								<td rowspan="2">search term</td>
+								<td rowspan="2"></td>
+								<td rowspan="2">omitted type <small>(defaults to <code>Q</code>)</small></td>
+								<td rowspan="2"></td>
+								<td>Property</td>
+								<td></td>
+								<td>Value</td>
+								<td rowspan="3"></td>
+								<td rowspan="2">search term</td>
+								<td rowspan="2"></td>
+								<td rowspan="2">type</td>
+								<td rowspan="2"></td>
+								<td>Property</td>
+								<td></td>
+								<td>Value</td>
+								<td rowspan="3"></td>
+								<td rowspan="2">search term</td>
+								<td rowspan="2"></td>
+								<td rowspan="2">type</td>
+								<td rowspan="2"></td>
+								<td rowspan="2"><i><a href="#help_wiki_article_name">Wiki article name</a></i></td>
+								<td rowspan="3"></td>
+								<td rowspan="3"><i><a href="#help_literals">Literal</a></i></td>
+								<td rowspan="3"></td>
+								<td rowspan="3"><i><a href="#help_literals">Literal</a></i></td>
+							</tr>
+							<tr class="underline_row">
+								<td colspan="3"><i><a href="#help_basic_conditions">Basic condition</a></i></td>
+								<td colspan="3"><i><a href="#help_basic_conditions">Basic condition</a></i></td>
+							</tr>
+							<tr class="underline_row">
+								<td colspan="7"><i><a href="#help_resolve_tuple">Resolve tuple</a></i></td>
+								<td colspan="7"><i><a href="#help_resolve_tuple">Resolve tuple</a></i></td>
+								<td colspan="5"><i><a href="#help_resolve_tuple">Resolve tuple</a></i></td>
+							</tr>
+							<tr class="underline_row">
+									<td colspan="25"><i><a href="#help_command_lines">Command line</a></i></td>
+								</tr>
+						</tbody>
+					</table>
+				</div>
 				
-				<h4>Command lines</h4>
-				<p><b>Command lines</b> don't serve a purpose but can be usefull for generating QuickStatements. Each command line consists of at least one 2-tuple or triple, so called <i>item tuples</i>. Multiple item tuples per command are seperated by a single tab.
+				<h4 id="help_command_lines">Command lines</h4>
+				<p><b>Command lines</b> don't serve a purpose but can be usefull for generating QuickStatements. Each command line consists of at least one so resolve <i><a href="#help_resolve_tuple">resolve tuple</a></i>. Multiple <i>request tuples</i> per command line are seperated by a single tab.
 				
-				<h4>Item tuple</h4>
-				<p>An <b>item tuple</b> can be either a 2-tuple or triple and consists of:</p>
-					<ul><i>Obligatory:</i> The first item of a tuple is the search term.</ul>
-					<ul><i>Optional:</i> The second item of a tuple is the expected datatype. Either <code>Q</code> or <code>P</code>. Defaults to <code>Q</code> if omitted or empty.</ul>
-					<ul><i>Optional:</i> The third item is a list of conditions for the expected item. Multiple conditions are separated by commas.</ul>
+				<h4 id="help_resolve_tuple">Resolve tuple</h4>
+				<p>A <b>resolve tuple</b> is what actually contains your search term to resolve. It consists of at least one and up to three parts which are seperated by pipes (<code>|</code>):</p>
+					<ul><i>Obligatory:</i> The first part of a tuple is your search term.</ul>
+					<ul><i>Optional:</i> The second part of a tuple is the expected datatype. Either <code>Q</code> or <code>P</code>. Defaults to <code>Q</code> if omitted or empty.</ul>
+					<ul><i>Optional:</i> The third part is a list of <i><a href="#help_conditions">conditions</a></i> for the expected Wikidate entity. Multiple conditions are separated by commas.</ul>
+
 					<i>Example:</i> <code>Wikidata</code>, <code>Wikidata|Q</code>, <code>Wikidata|Q|P31=Q14827288</code>, <code>Wikidata||P31=Q14827288</code>
-				
-				<h4>Literals</h4>
+
+				<h4 id="help_literals">Literals</h4>
 				<p>A <b>literal</b> is a string which will not be processed but output. This can be handy for generating QuickStatements. A literal starts with a dollar sign (<code>$</code>) and is followed by the text.<br/>
 					<i>Example:</i> <code>$Wikidata</code>, <code>$P31</code></p>
 				
-				<h4>Conditions</h4>
+				<h4 id="help_conditions">Conditions</h4>
 				<p><b>Conditions</b> define which items to automatically ignore. A condition is a 2-tuple and consists of a property and a value seperated by a certain command-character. Multiple conditions which all have to be fullfilled (AND conditions) can be specified by seperating them with commas (<code>,</code>).</p>
 				
-				<h5>Basic conditions <code>=</code></h5>
+				<h5 id="help_basic_conditions">Basic conditions <code>=</code></h5>
 				<p>A <b>basic condition</b> consists of a property and a value seperated by an "equals to"-character (<code>=</code>). A candidate has to have the property and value for the property as defined in the tuple. This does not check for transitive properties.<br/>
 					<i>Example:</i> <code>Wikidata||P275=Q6938433</code>, <code>Wikidata||P275=Q6938433,P31=Q35127</code></p>
 
-				<h5>Basic conditions - Transitive <code>*=</code></h5>
-				<p>A <b>basic condition</b> can be extended to check for transitive properties by appending an "asterisk"-character <code>*</code> to the property.<br/>
+				<h5 id="help_basic_conditions_transitive">Basic conditions - Transitive <code>*=</code></h5>
+				<p>A <b>basic condition</b> can be extended to check for transitive properties by appending an "asterisk"-character (<code>*</code>) to the property.<br/>
 					<i>Example:</i> <code>Treptow-Köpenick||P131*=Q183</code></p>
 
-				<h5>Wiki article name <code>^</code></h5>
+				<h5 id="help_wiki_article_name">Wiki article name <code>^</code></h5>
 				<p>This condition can be used to extract the associated Wikidata ID from a given wiki article. A list of all wiki abbreviations can be found <a href="https://www.wikidata.org/w/api.php?action=help&modules=wbgetentities" target="_blank" rel="noopener">here</a> next to "Sites".<br/>
 					<i>Example:</i> <code>Platooning||^enwiki</code></p>
 
-				<h5>SPARQL conditions <code>~</code></h5>
+				<h5 id="help_spaql_conditions">SPARQL conditions <code>~</code></h5>
 				<p>A <b>SPARQL condition</b> consists of a property and a value seperated by a "tilde"-character (<code>~</code>). They are the most versatile type of conditions and will be set together to <code>?item <i>&lt;property&gt;</i> <i>&lt;value&gt;</i> .</code>. Please note that SPARQL prefixes like "wdt" and "wd" are required.<br/>
 					<i>Example:</i> Filter organs - <code>Heart||wdt:P31/wdt:P279*~wd:Q712378</code></p>
 				<p>Useful combinations:</p>

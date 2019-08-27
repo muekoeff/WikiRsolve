@@ -23,6 +23,19 @@ jQuery(document).ready(function($) {
 		e.preventDefault();
 		request();
 	});
+	// @source https://sumtips.com/snippets/javascript/tab-in-textarea/#jq
+	$("#commands").keydown(function(e) {
+		if(e.keyCode === 9) { // tab was pressed
+			// get caret position/selection
+			var start = this.selectionStart;
+			var end = this.selectionEnd;
+	
+			var $this = $(this);
+			$this.val(`${$this.val().substring(0, start)}\t${$this.val().substring(end)}`);
+			this.selectionStart = this.selectionEnd = start + 1;
+			return false;
+		}
+	});
 	$("#statusfilter").on("changed.bs.select", function(e, clickedIndex, isSelected, previousValue) {
 		e.preventDefault();
 		updateFilter();
