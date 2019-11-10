@@ -1,354 +1,45 @@
 <!doctype html>
-<html class="stickyfooter" lang="en">
+<html lang="de">
 <head>
-<meta charset="utf-8" />
-<meta content="nw520" name="author" />
-<meta content="width=device-width,initial-scale=1,shrink-to-fit=no" name="viewport" />
-<title>WikiRsolve &laquo; Wikidata Tools</title>
-<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css" integrity="sha384-9gVQ4dYFwwWSjIDZnLEWnxCjeSWFphJiwGPXr1jddIhOegiu1FwO5qRGvFXOdJZ4" crossorigin="anonymous" />
-<link rel="stylesheet" href="data/css/style.css" />
-<link rel="stylesheet" href="data/components/tooltipster/4.0/css/tooltipster.bundle.min.css" />
-<link rel="stylesheet" href="data/components/tooltipster/4.0/css/plugins/tooltipster/sideTip/themes/tooltipster-sideTip-light.min.css" />
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.10/dist/css/bootstrap-select.min.css">
+<meta charset="utf-8">
+<title>WikiRsolve moved to GitLab</title>
+<meta name="author" content="µKöff" />
+<meta name="viewport" content="initial-scale=1.0,user-scalable=yes,width=device-width" />
+<script>
+window.location.replace(`https://muekoeff.gitlab.io/rsolver/${window.location.search}`);
+</script>
+<style>
+* {
+	box-sizing: border-box;
+}
+a:active,a:link,a:visited{
+	background-color: rgba(0, 0, 0, 0);
+	color: #f5c533;
+	transition: background-color 0.25s ease-in-out
+}
+a:focus,a:hover{
+	background-color: rgba(0, 0, 0, .5);
+}
+body, html {
+	align-items: center;
+	background: #e31b2e;
+	color: #fff;
+	display: flex;
+	font-family: sans-serif;
+	font-size: 1.2em;
+	height: 100%;
+	margin: 0;
+	padding: 0;
+	width: 100%;
+}
+h1 {
+	flex: 1;
+	text-align: center;
+}
+</style>
 </head>
 
 <body>
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-	<a class="navbar-brand" href="#">WikiRsolve</a>
-	<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggler" aria-controls="navbarToggler" aria-expanded="false" aria-label="Toggle navigation">
-		<span class="navbar-toggler-icon"></span>
-	</button>
-	<div class="collapse navbar-collapse" id="navbarToggler">
-		<ul class="nav navbar-nav">
-			<li class="nav-item dropdown">
-				<a class="nav-link dropdown-toggle" href="#" id="navitem-tools" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">More Wikidata tools</a>
-				<div class="dropdown-menu" aria-labelledby="navitem-tools">
-					<a class="dropdown-item" href="https://muekoeff.github.io/Wikicompare/" rel="noopener">WikiCompare</a>
-					<a class="dropdown-item" href="https://muekoeff.github.io/wikiosmerged/" rel="noopener">WikiOSMerged</a>
-				</div>
-			</li>
-			<li class="nav-item">
-				<a class="nav-link" href="https://tools.wmflabs.org/quickstatements/#/batch" rel="noopener">QuickStatements</a>
-			</li>
-			<li class="nav-item">
-				<a class="nav-link" href="#" data-toggle="modal" data-target="#modal-settings">Settings</a>
-			</li>
-			<li class="nav-item">
-				<a class="nav-link" href="#" data-toggle="modal" data-target="#modal-help">Help</a>
-			</li>
-		</ul>
-	</div>
-</nav>
-<main class="container">
-	<div id="rowTable">
-		<div class="row">
-			<textarea id="commands" class="form-control" rows="10"></textarea>
-		</div>
-		<br />
-		<div class="row">
-			<button id="button-parse" class="btn btn-primary" disabled>Parse</button>&nbsp;
-			<button id="button-request" class="btn btn-primary" disabled style="display:none">Request</button>&nbsp;
-			<div style="align-items:center;display:flex;margin-left:2em">
-				<p style="margin:0">No idea what to to? Click <a href="#" data-toggle="modal" data-target="#modal-help">here</a> to read the help. Or hit that "Use example"-button to the right.</p>
-			</div>
-			<div style="flex:1;text-align:right">
-				<a id="button-copyexample" class="btn btn-light" href="#">Use example</a>
-				<a id="button-settings" class="btn btn-secondary" href="#" title="Open settings" data-toggle="modal" data-target="#modal-settings">⚙️</a>
-			</div>
-		</div>
-	</div>
-	<div id="rowTable" style="margin-top:1.5em">
-		<div class="row">
-			<h3>Data</h3>
-			<div style="flex:1;text-align:right">
-				<select id="statusfilter" class="selectpicker" multiple title="Filter results by status">
-					<option value="pending" selected>Pending</option>
-					<option value="disambiguation" selected>Disambiguation</option>
-					<option value="no results" selected>No results</option>
-					<option value="success" selected>Success</option>
-					<option value="failed" selected>Failed</option>
-				  </select>
-			</div>
-		</div>
-		<div class="row">
-			<table id="table-output" class="table table-striped" role="grid">
-				<thead>
-					<tr role="row">
-						<th scope="col">#</th>
-						<th scope="col">Status</th>
-						<th scope="col">Search query</th>
-						<th scope="col">Result</th>
-						<th scope="col">Disambiguation</th>
-					</tr>
-				</thead>
-				<tbody>
-					<tr>
-						<td colspan="5">No data</td>
-					</tr>
-				</tbody>
-			</table>
-		</div>
-		<div class="row">
-			<button id="button-output" class="btn btn-primary" disabled style="display:none">Generate output</button>&nbsp;
-		</div>
-	</div>
-	<div id="rowTable" style="margin-top:1.5em">
-		<div class="row">
-			<h3 style="flex:1">Result</h3>
-			<div class="btn-group" role="group">
-				<button id="button-result-tools" type="button" class="btn dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" disabled>External tools</button>
-				<div class="dropdown-menu" aria-labelledby="button-result-tools">
-					<button id="button-copyquickstatements" class="dropdown-item" type="button" disabled>Copy &amp; open QuickStatements</button>
-					<a id="button-wikicompare" class="dropdown-item" href="#" style="display:none" >Open in WikiCompare</a>
-				</div>
-				<button id="button-copy" class="btn btn-default btn-secondary" disabled>Copy</button>
-			</div>
-		</div>
-		<div class="row">
-			<textarea id="output" class="form-control" readonly rows="5"></textarea>
-		</div>
-	</div>
-	<div id="rowTable" style="margin-top:1.5em">
-		<div class="row d-flex">
-			<h3>Failed</h3>
-		</div>
-		<div class="row">
-			<textarea id="output-failed" class="form-control" readonly rows="1"></textarea>
-		</div>
-	</div>
-</main>
-<footer class="footer">
-	<div class="container text-right">
-		<span class="text-muted">
-			Tool made by <a href="https://nw520.de/" target="_blank" rel="noopener">nw520</a> <small>(<a href="https://www.wikidata.org/wiki/User:Nw520" target="_blank" rel="noopener">@ Wikidata</a>)</small>.<br/>
-			Thanks to <a href="https://www.wikidata.org/wiki/User:Tagishsimon" target="_blank" rel="noopener">Tagishsimon</a> for providing me with a <a href="https://www.wikidata.org/wiki/Wikidata:Request_a_query/Archive/2018/05#Check_whether_a_given_list_of_element_IDs_fullfills_certain_criteria_and_return_list_of_matching_items" target="_blank" rel="noopener">SPARQL query</a>.<br/>
-			<a href="https://github.com/muekoeff/wikirsolve" target="_blank" rel="noopener">Source code @ GitHub</a> &bull; <a href="https://github.com/muekoeff/wikirsolve/issues" target="_blank" rel="noopener">Report bugs @ GitHub</a>
-		</span>
-	</div>
-</footer>
-
-<div class="modal fade" id="modal-settings" tabindex="-1" role="dialog" aria-labelledby="modal-settings-label" aria-hidden="true">
-	<div class="modal-dialog" role="document">
-		<div class="modal-content">
-			<div class="modal-header">
-				<h5 class="modal-title" id="modal-settings-label">Advanced Settings</h5>
-				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-					<span aria-hidden="true">&times;</span>
-				</button>
-			</div>
-			<div class="modal-body">
-				<table class="table" role="grid">
-					<tbody>
-						<tr>
-							<th scope="row">Search language</th>
-							<td>
-								<input id="setting-language-search" class="form-control custom-select" type="text" list="languages" value="en" />
-							</td>
-						</tr>
-						<tr>
-							<th scope="row">Item description language</th>
-							<td>
-								<input id="setting-language-item" class="form-control custom-select" type="text" list="languages" value="en" />
-							</td>
-						</tr>
-						<tr>
-							<th scope="row">Number of disambiguation candidates</th>
-							<td>
-								<form name="setting-disambiguation-candidatesnumberForm">
-									<input id="setting-disambiguation-candidatesnumber" class="form-control" type="number" value="7" min="1" max="50" />
-								</form>
-							</td>
-						</tr>
-						<tr>
-							<th scope="row">Highlight matching string in disambiguation candidates</th>
-							<td>
-								<input id="setting-disambiguation-matchhighlight" class="form-control" type="checkbox" checked />
-							</td>
-						</tr>
-						<tr>
-							<th scope="row">Only resolve first column and ignore the other ones</th>
-							<td>
-								<input id="setting-resolveonlyfirst" class="form-control" type="checkbox" checked />
-							</td>
-						</tr>
-					</tbody>
-				</table>
-				<datalist id="languages"></datalist>
-			</div>
-			<div class="modal-footer">
-				<div class="btn-group" role="group">
-					<button id="button-settings-save" type="button" class="btn btn-primary">Save</button>
-					<button id="button-settings-geturl" type="button" class="btn btn-secondary">Get URL</button>
-					<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-				</div>
-			</div>
-		</div>
-	</div>
-</div>
-<div class="modal fade" id="modal-help" tabindex="-1" role="dialog" aria-labelledby="modal-help-label" aria-hidden="true">
-	<div class="modal-dialog" role="document">
-		<div class="modal-content">
-			<div class="modal-header">
-				<h5 class="modal-title" id="modal-help-label">Help</h5>
-				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-					<span aria-hidden="true">&times;</span>
-				</button>
-			</div>
-			<div class="modal-body">
-				<h2>Help</h2>
-				<p><b>WikiR<span style="color:#bbb">e</span>solve</b> is a tool for automatically resolving Wikidata entity ids of a given list of search queries.</p>
-				
-				<h3>Syntax</h3>
-				<p>The syntax of WikiRsolve is based on the one of <a href="https://tools.wmflabs.org/quickstatements/" target="_blank" rel="noopener">QuickStatements v1</a> and, if the operations succeed, will be processed to valid QuickStatements v1 statements.</p>
-				<p>A simple query which consists of only one <i><a href="#help_command_lines">command line</a></i> could for example look like this:<br/>
-					<code>Wikidata||P31=Q14827288<span class="highlight-tab"></span>operator|P|P1629=Q29933786<span class="highlight-tab"></span>Wikimedia Foundation|Q|^enwiki<span class="highlight-tab"></span>$P275<span class="highlight-tab"></span>$Q6938433</code>
-				</p>
-				<style>
-					#help_sampletable {
-						overflow-x: scroll;
-						white-space: nowrap;
-						text-align: center;
-					}
-					#help_sampletable * {
-						vertical-align: top;
-					}
-					.underline_row {
-						font-size: .9em;
-					}
-					.underline_row > td:not(:empty) {
-						border-top: solid thin var(--blue);
-					}
-				</style>
-				<div id="help_sampletable">
-					<table>
-						<tbody>
-							<tr>
-								<td><code>Wikidata</code></td>
-								<td><code>|</code></td>
-								<td></td>
-								<td><code>|</code></td>
-								<td><code>P31</code></td>
-								<td><code>=</code></td>
-								<td><code>Q14827288</code></td>
-								<td><code><span class="highlight-tab"></span></code></td>
-								<td><code>operator</code></td>
-								<td><code>|</code></td>
-								<td><code>P</code></td>
-								<td><code>|</code></td>
-								<td><code>P1629</code></td>
-								<td><code>=</code></td>
-								<td><code>Q29933786</code></td>
-								<td><code><span class="highlight-tab"></span></code></td>
-								<td><code>Wikimedia Foundation</code></td>
-								<td><code>|</code></td>
-								<td><code>Q</code></td>
-								<td><code>|</code></td>
-								<td><code>^enwiki</code></td>
-								<td><code><span class="highlight-tab"></span></code></td>
-								<td><code>$P275</code></td>
-								<td><code><span class="highlight-tab"></span></code></td>
-								<td><code>$Q6938433</code></td>
-							</tr>
-							<tr class="underline_row">
-								<td rowspan="2">search term</td>
-								<td rowspan="2"></td>
-								<td rowspan="2">omitted type <small>(defaults to <code>Q</code>)</small></td>
-								<td rowspan="2"></td>
-								<td>Property</td>
-								<td></td>
-								<td>Value</td>
-								<td rowspan="3"></td>
-								<td rowspan="2">search term</td>
-								<td rowspan="2"></td>
-								<td rowspan="2">type</td>
-								<td rowspan="2"></td>
-								<td>Property</td>
-								<td></td>
-								<td>Value</td>
-								<td rowspan="3"></td>
-								<td rowspan="2">search term</td>
-								<td rowspan="2"></td>
-								<td rowspan="2">type</td>
-								<td rowspan="2"></td>
-								<td rowspan="2"><i><a href="#help_wiki_article_name">Wiki article name</a></i></td>
-								<td rowspan="3"></td>
-								<td rowspan="3"><i><a href="#help_literals">Literal</a></i></td>
-								<td rowspan="3"></td>
-								<td rowspan="3"><i><a href="#help_literals">Literal</a></i></td>
-							</tr>
-							<tr class="underline_row">
-								<td colspan="3"><i><a href="#help_basic_conditions">Basic condition</a></i></td>
-								<td colspan="3"><i><a href="#help_basic_conditions">Basic condition</a></i></td>
-							</tr>
-							<tr class="underline_row">
-								<td colspan="7"><i><a href="#help_resolve_tuple">Resolve tuple</a></i></td>
-								<td colspan="7"><i><a href="#help_resolve_tuple">Resolve tuple</a></i></td>
-								<td colspan="5"><i><a href="#help_resolve_tuple">Resolve tuple</a></i></td>
-							</tr>
-							<tr class="underline_row">
-									<td colspan="25"><i><a href="#help_command_lines">Command line</a></i></td>
-								</tr>
-						</tbody>
-					</table>
-				</div>
-				
-				<h4 id="help_command_lines">Command lines</h4>
-				<p><b>Command lines</b> don't serve a purpose but can be usefull for generating QuickStatements. Each command line consists of at least one so resolve <i><a href="#help_resolve_tuple">resolve tuple</a></i>. Multiple <i>request tuples</i> per command line are seperated by a single tab.
-				
-				<h4 id="help_resolve_tuple">Resolve tuple</h4>
-				<p>A <b>resolve tuple</b> is what actually contains your search term to resolve. It consists of at least one and up to three parts which are seperated by pipes (<code>|</code>):</p>
-					<ul><i>Obligatory:</i> The first part of a tuple is your search term.</ul>
-					<ul><i>Optional:</i> The second part of a tuple is the expected datatype. Either <code>Q</code> or <code>P</code>. Defaults to <code>Q</code> if omitted or empty.</ul>
-					<ul><i>Optional:</i> The third part is a list of <i><a href="#help_conditions">conditions</a></i> for the expected Wikidate entity. Multiple conditions are separated by commas.</ul>
-
-					<i>Example:</i> <code>Wikidata</code>, <code>Wikidata|Q</code>, <code>Wikidata|Q|P31=Q14827288</code>, <code>Wikidata||P31=Q14827288</code>
-
-				<h4 id="help_literals">Literals</h4>
-				<p>A <b>literal</b> is a string which will not be processed but output. This can be handy for generating QuickStatements. A literal starts with a dollar sign (<code>$</code>) and is followed by the text.<br/>
-					<i>Example:</i> <code>$Wikidata</code>, <code>$P31</code></p>
-				
-				<h4 id="help_conditions">Conditions</h4>
-				<p><b>Conditions</b> define which items to automatically ignore. A condition is a 2-tuple and consists of a property and a value seperated by a certain command-character. Multiple conditions which all have to be fullfilled (AND conditions) can be specified by seperating them with commas (<code>,</code>).</p>
-				
-				<h5 id="help_basic_conditions">Basic conditions <code>=</code></h5>
-				<p>A <b>basic condition</b> consists of a property and a value seperated by an "equals to"-character (<code>=</code>). A candidate has to have the property and value for the property as defined in the tuple. This does not check for transitive properties.<br/>
-					<i>Example:</i> <code>Wikidata||P275=Q6938433</code>, <code>Wikidata||P275=Q6938433,P31=Q35127</code></p>
-
-				<h5 id="help_basic_conditions_transitive">Basic conditions - Transitive <code>*=</code></h5>
-				<p>A <b>basic condition</b> can be extended to check for transitive properties by appending an "asterisk"-character (<code>*</code>) to the property.<br/>
-					<i>Example:</i> <code>Treptow-Köpenick||P131*=Q183</code></p>
-
-				<h5 id="help_wiki_article_name">Wiki article name <code>^</code></h5>
-				<p>This condition can be used to extract the associated Wikidata ID from a given wiki article. A list of all wiki abbreviations can be found <a href="https://www.wikidata.org/w/api.php?action=help&modules=wbgetentities" target="_blank" rel="noopener">here</a> next to "Sites".<br/>
-					<i>Example:</i> <code>Platooning||^enwiki</code></p>
-
-				<h5 id="help_spaql_conditions">SPARQL conditions <code>~</code></h5>
-				<p>A <b>SPARQL condition</b> consists of a property and a value seperated by a "tilde"-character (<code>~</code>). They are the most versatile type of conditions and will be set together to <code>?item <i>&lt;property&gt;</i> <i>&lt;value&gt;</i> .</code>. Please note that SPARQL prefixes like "wdt" and "wd" are required.<br/>
-					<i>Example:</i> Filter organs - <code>Heart||wdt:P31/wdt:P279*~wd:Q712378</code></p>
-				<p>Useful combinations:</p>
-				<ul>
-					<li><code>wdt:P31/wdt:P279*~</code>, instance of/subclass of*</li>
-				</ul>
-			</div>
-			<div class="modal-footer">
-				<button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
-			</div>
-		</div>
-	</div>
-</div>
-<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
-<script src="data/components/tooltipster/4.0/js/tooltipster.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.10/dist/js/bootstrap-select.min.js"></script>
-<script src="data/js/condition.js"></script>
-<script src="data/js/requestManager.js"></script>
-<script src="data/js/settings.js"></script>
-<script src="data/js/taskQueue.js"></script>
-<script src="data/js/tuple.js"></script>
-<script src="data/js/uiRow.js"></script>
-<script src="data/js/utils.js"></script>
-<script src="data/js/wikiUtils.js"></script>
-<script src="data/js/script.js"></script>
+<h1>WikiRsolve has moved to <a href="https://muekoeff.gitlab.io/rsolver">GitLab</a></h1>
 </body>
 </html>
